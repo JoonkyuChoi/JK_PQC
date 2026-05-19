@@ -34,7 +34,7 @@ portfolio
 ```
 
 ## 설명
-본 게시물은 [GitHub](https://github.com/JoonkyuChoi/JK-PQC) 저장소에 공개하였습니다.
+본 게시물은 [GitHub](https://github.com/JoonkyuChoi/JK_PQC) 저장소에 공개하였습니다.
 
 급변하는 인공지능 시대에, PQC(양자내성암호) 인증 시스템을 선제적으로 구축하여, 다가오는 양자컴퓨터 시대에 대응하고자 프로젝트를 진행하였습니다.
 
