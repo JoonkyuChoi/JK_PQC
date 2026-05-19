@@ -1,0 +1,26 @@
+# Exclude folders
+certs/
+pre-certs/
+
+# Generated files
+*.exe
+*.dll
+*.pdb
+*.bkp
+
+# Generated folders
+bin/gcc/
+bin/msvc/Debug/*.lib
+bin/msvc/Debug/*.exp
+
+bin/msvc/Debug/obj/**
+bin/msvc/Release/obj/**
+
+# build/msvc
+build/msvc2022/.vs/**
+build/msvc2022/Debug/**
+build/msvc2022/Release/**
+build/msvc2022/projects/*.user
+
+# resources
+
