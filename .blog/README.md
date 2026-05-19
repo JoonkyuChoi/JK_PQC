@@ -8,7 +8,8 @@
 JK-PQC
 
 ## Excerpt
-JK's PQC(양자내성암호) 인증 시스템 구축
+JK's PQC(양자내성암호) 인증 시스템 구축 및 개발
+(Hybrid mTLS)
 
 ## Tag
 portfolio
