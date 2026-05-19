@@ -45,7 +45,7 @@ D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
 │   ├── Build-Dependencies.md # 종속 오픈소스 빌드하기
 │   ├── Cursor-Settings.md # Cursor 구축 및 활용
 │   ├── Files-Structure.md # 폴더/파일 구조 분석
-│   ├── Making-Certs.md # `이중 인증서` 체게 구축
+│   ├── Making-Certs.md # `이중 인증서` 체계 구축
 │   ├── README.md # 이 폴더는 `소유자(JK)가 기록한 문서 파일들을 저장`한다.
 │   ├── images/
 │   │   ├── JK-PQC-18080-mTLS.png
