@@ -13,17 +13,136 @@ $ python -V
 
 # JK_PyTools 경로에서, 구조 분석 수행
 $ cd "D:\E\Study\GitHub-Local\repos\AI\Python\JK_PyTools"
-$ python PyFolderViewer/pyfolderviewer.py "D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC" --hide-size --deny-dir=.git,.vs,bin --deny-ext=user --max-depth=10
+$ python PyFolderViewer/pyfolderviewer.py "D:\E\Study\AI\AutoAgents\projects\JK-PQC" --hide-size --deny-dir=.git,.vs,bin,pre-certs --deny-ext=user --max-depth=10
 ```
 ```
-D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
+D:\E\Study\AI\AutoAgents\projects\JK-PQC/
 ├── .blog/
 │   ├── JK-PQC-18080.png
 │   └── README.md # 블로그 게시물 작성
-├── .cursor/
-│   └── rules/
-│       ├── identity.mdc
-│       └── korean.mdc
+├── _deps/
+│   ├── Debug/
+│   │   ├── libllhttp/
+│   │   │   ├── include/
+│   │   │   │   └── llhttp.h
+│   │   │   └── lib/
+│   │   │       ├── cmake/
+│   │   │       │   └── llhttp/
+│   │   │       │       ├── llhttp-targets-debug.cmake
+│   │   │       │       ├── llhttp-targets.cmake
+│   │   │       │       ├── llhttpConfig.cmake
+│   │   │       │       └── llhttpConfigVersion.cmake
+│   │   │       ├── llhttp.lib
+│   │   │       └── pkgconfig/
+│   │   │           └── libllhttp.pc
+│   │   └── liboqs/
+│   │       ├── include/
+│   │       │   └── oqs/
+│   │       │       ├── aes_ops.h
+│   │       │       ├── common.h
+│   │       │       ├── kem.h
+│   │       │       ├── kem_classic_mceliece.h
+│   │       │       ├── kem_frodokem.h
+│   │       │       ├── kem_kyber.h
+│   │       │       ├── kem_ml_kem.h
+│   │       │       ├── kem_ntruprime.h
+│   │       │       ├── oqs.h
+│   │       │       ├── oqsconfig.h
+│   │       │       ├── rand.h
+│   │       │       ├── sha2_ops.h
+│   │       │       ├── sha3_ops.h
+│   │       │       ├── sha3x4_ops.h
+│   │       │       ├── sig.h
+│   │       │       ├── sig_cross.h
+│   │       │       ├── sig_dilithium.h
+│   │       │       ├── sig_falcon.h
+│   │       │       ├── sig_mayo.h
+│   │       │       ├── sig_ml_dsa.h
+│   │       │       ├── sig_sphincs.h
+│   │       │       ├── sig_stfl.h
+│   │       │       └── sig_uov.h
+│   │       └── lib/
+│   │           ├── cmake/
+│   │           │   └── liboqs/
+│   │           │       ├── liboqsConfig.cmake
+│   │           │       ├── liboqsConfigVersion.cmake
+│   │           │       ├── liboqsTargets-debug.cmake
+│   │           │       └── liboqsTargets.cmake
+│   │           ├── oqs.lib
+│   │           └── pkgconfig/
+│   │               └── liboqs.pc
+│   ├── cpp-httplib/
+│   │   ├── include/
+│   │   │   └── httplib.h
+│   │   └── lib/
+│   │       ├── Debug/
+│   │       │   ├── cpp-httplib-0.40.0.lib
+│   │       │   └── cpp-httplib-0.40.0.pdb
+│   │       └── Release/
+│   │           └── cpp-httplib-0.40.0.lib
+│   ├── libllhttp/
+│   │   ├── include/
+│   │   │   └── llhttp.h
+│   │   └── lib/
+│   │       ├── cmake/
+│   │       │   └── llhttp/
+│   │       │       ├── llhttp-targets-release.cmake
+│   │       │       ├── llhttp-targets.cmake
+│   │       │       ├── llhttpConfig.cmake
+│   │       │       └── llhttpConfigVersion.cmake
+│   │       ├── llhttp.lib
+│   │       └── pkgconfig/
+│   │           └── libllhttp.pc
+│   ├── liboqs/
+│   │   ├── include/
+│   │   │   └── oqs/
+│   │   │       ├── aes_ops.h
+│   │   │       ├── common.h
+│   │   │       ├── kem.h
+│   │   │       ├── kem_classic_mceliece.h
+│   │   │       ├── kem_frodokem.h
+│   │   │       ├── kem_kyber.h
+│   │   │       ├── kem_ml_kem.h
+│   │   │       ├── kem_ntruprime.h
+│   │   │       ├── oqs.h
+│   │   │       ├── oqsconfig.h
+│   │   │       ├── rand.h
+│   │   │       ├── sha2_ops.h
+│   │   │       ├── sha3_ops.h
+│   │   │       ├── sha3x4_ops.h
+│   │   │       ├── sig.h
+│   │   │       ├── sig_cross.h
+│   │   │       ├── sig_dilithium.h
+│   │   │       ├── sig_falcon.h
+│   │   │       ├── sig_mayo.h
+│   │   │       ├── sig_ml_dsa.h
+│   │   │       ├── sig_sphincs.h
+│   │   │       ├── sig_stfl.h
+│   │   │       └── sig_uov.h
+│   │   └── lib/
+│   │       ├── cmake/
+│   │       │   └── liboqs/
+│   │       │       ├── liboqsConfig.cmake
+│   │       │       ├── liboqsConfigVersion.cmake
+│   │       │       ├── liboqsTargets-release.cmake
+│   │       │       └── liboqsTargets.cmake
+│   │       ├── oqs.lib
+│   │       └── pkgconfig/
+│   │           └── liboqs.pc
+│   └── oqs-provider/
+│       ├── include/
+│       │   └── oqs-provider/
+│       │       └── oqs_prov.h
+│       └── lib/
+│           ├── Debug/
+│           │   ├── oqsprovider.dll
+│           │   ├── oqsprovider.exp
+│           │   ├── oqsprovider.lib
+│           │   └── oqsprovider.pdb
+│           └── Release/
+│               ├── oqsprovider.dll
+│               ├── oqsprovider.exp
+│               └── oqsprovider.lib
 ├── build/
 │   └── msvc2022/
 │       ├── JK-PQC.sln
@@ -39,8 +158,12 @@ D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
 │           ├── jk-mtls-client.vcxproj.filters
 │           ├── jk-mtls-server.vcxproj
 │           ├── jk-mtls-server.vcxproj.filters
+│           ├── jk-pqc-server.filters
+│           ├── jk-pqc-server.vcxproj
 │           ├── test_provider.vcxproj
-│           └── test_provider.vcxproj.filters
+│           ├── test_provider.vcxproj.filters
+│           ├── test_socketpool.vcxproj
+│           └── test_socketpool.vcxproj.filters
 ├── docs/
 │   ├── Build-Dependencies.md # 종속 오픈소스 빌드하기
 │   ├── Cursor-Settings.md # Cursor 구축 및 활용
@@ -53,9 +176,6 @@ D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
 │   │   ├── JK-PQC-18081.png
 │   │   └── License-Apache2.0-blue.svg
 │   └── log-https-apps.md # `jk-https-*` 어플 로그
-├── include/
-│   ├── httplib.h
-│   └── json.hpp
 ├── src/
 │   ├── README.md # 이 폴더는 `전반적인 소스 코드 파일들을 저장`한다.
 │   ├── clients/
@@ -64,8 +184,11 @@ D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
 │   │   └── jk-mtls-client.cpp
 │   ├── common/
 │   │   ├── README.md # 이 폴더는 `공통`의 소스코드 파일들을 저장한다.
+│   │   ├── SocketPool.cpp
+│   │   ├── SocketPool.h
 │   │   ├── https.cpp
 │   │   ├── https.h
+│   │   ├── json.hpp
 │   │   ├── pqc_utils.cpp
 │   │   ├── pqc_utils.h
 │   │   ├── shm_stats.cpp
@@ -75,16 +198,18 @@ D:\E\Study\GitHub-Local\repos\AI\Gateways\@JK-PQC/
 │   │   ├── jk-https-dashboard.cpp
 │   │   ├── jk-https-server.cpp
 │   │   ├── jk-mtls-server.cpp
+│   │   ├── jk-pqc-server.cpp
 │   │   ├── shm_consumer.cpp
 │   │   └── shm_consumer.h
 │   ├── tests/
 │   │   ├── README.md # 이 폴더는 `테스트 관련 어플`의 소스코드 파일들을 저장한다.
-│   │   └── test_provider.c
+│   │   ├── test_provider.c
+│   │   └── test_socketpool.cpp
 │   └── tools/
 │       └── README.md # 이 폴더는 `툴 관련 어플`의 소스코드 파일들을 저장한다.
 ├── .gitignore
 ├── LICENSE
-├── README.md # JK's PQC(양자내성암호) 인증 시스템 구축
+├── README.md # JK's PQC(양자내성암호) 인증 시스템 구축 및 개발
 ├── clean-all.bat
 ├── clean-bin.bat
 ├── gen-certs.bat

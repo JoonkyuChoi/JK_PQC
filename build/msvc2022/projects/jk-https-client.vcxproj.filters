@@ -10,8 +10,23 @@
     <Filter Include="src\clients">
       <UniqueIdentifier>{f42cd3e6-f949-4007-9e08-98d79b15c5e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include">
-      <UniqueIdentifier>{f93758ab-3bd6-43f5-8ac4-b8fa371c5658}</UniqueIdentifier>
+    <Filter Include="_deps">
+      <UniqueIdentifier>{1bcc9137-2c07-4f53-8970-c94e64e4445b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_deps\cpp-httplib">
+      <UniqueIdentifier>{5d3767bf-7621-4f37-a69e-049d9f808ec4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_deps\cpp-httplib\include">
+      <UniqueIdentifier>{30f7c1df-6566-4472-b464-df008fb0d0b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_deps\liboqs">
+      <UniqueIdentifier>{1973845c-cdff-4101-8d36-71ba8abab272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_deps\liboqs\include">
+      <UniqueIdentifier>{b9c36a74-2ccf-4eec-a0a2-5697b06443e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_deps\liboqs\include\oqs">
+      <UniqueIdentifier>{72c8ebe3-e285-4400-9c5d-e952badabf99}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,11 +50,14 @@
     <ClInclude Include="..\..\..\src\common\https.h">
       <Filter>src\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\httplib.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\common\shm_stats.h">
       <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\_deps\cpp-httplib\include\httplib.h">
+      <Filter>_deps\cpp-httplib\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\_deps\liboqs\include\oqs\oqs.h">
+      <Filter>_deps\liboqs\include\oqs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

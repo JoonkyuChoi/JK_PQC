@@ -552,18 +552,23 @@ bool CHttpsServer::Run(int a_iPort)
     fprintf(stderr, "[ERR_] CShmStatsProducer 초기화 실패\n");
     return false;
   }
+  // -------------------------------------
+  // 통계 업데이트 쓰레드 시작
+  // -------------------------------------
   m_bRunStatsLoop.store(true);
   m_oStatsThread = std::thread(&CHttpsServer::_updateStatsLoop, this);
   // -------------------------------------
-  // [JKC:20260516-0520] 연결당 최초요청 전처리
+  // [JKC:20260516-0520] 연결당 최초요청 전처리 콜백 설정
   // -------------------------------------
   l_oServer.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res)
   {
     printf("[REQ_:%s:%05d] %s %s\n", req.remote_addr.c_str(), req.remote_port, req.method.c_str(), req.path.c_str());
     return httplib::Server::HandlerResponse::Unhandled;
   });
-  // -------------------------------------
+  // -----------------------------------------------------------------------------
   // 경로 라우팅 핸들러 설정
+  // -----------------------------------------------------------------------------
+  // API : 루트 (브라우저 접속 시 HTML, API 클라이언트 접속 시 간단 텍스트)
   // -------------------------------------
   l_oServer.Get("/", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
@@ -593,7 +598,9 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
-  
+  // -------------------------------------
+  // API : 상태 조회
+  // -------------------------------------
   l_oServer.Get("/api/status", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
     m_oShmStatsProducer.OnConnect();
@@ -624,6 +631,9 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
+  // -------------------------------------
+  // API : 세션/트래픽 통계 조회
+  // -------------------------------------
   l_oServer.Get("/api/session", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
     m_oShmStatsProducer.OnConnect();
@@ -663,6 +673,9 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
+  // -------------------------------------
+  // API : 클라이언트 요청/응답 통계 조회
+  // -------------------------------------
   l_oServer.Get("/api/client/info", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
     m_oShmStatsProducer.OnConnect();
@@ -718,6 +731,9 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
+  // -------------------------------------
+  // API : 통계 정보 조회
+  // -------------------------------------
   l_oServer.Get("/api/stats", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
     m_oShmStatsProducer.OnConnect();
@@ -742,6 +758,9 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
+  // -------------------------------------
+  // API : 에코 (테스트용)
+  // -------------------------------------
   l_oServer.Post("/api/echo", [this](const httplib::Request& a_rReq, httplib::Response& a_rRes)
   {
     m_oShmStatsProducer.OnConnect();
@@ -751,21 +770,30 @@ bool CHttpsServer::Run(int a_iPort)
     m_oShmStatsProducer.AddTxBytes(static_cast<uint64_t>(a_rRes.body.size()));
     m_oShmStatsProducer.OnDisconnect();
   });
+  // -----------------------------------------------------------------------------
+  // -------------------------------------
+  // 서버 시작
+  // -------------------------------------
   printf("서버 대기 중 : 0.0.0.0:%d\n", a_iPort);
   const bool l_bListenOk = l_oServer.listen("0.0.0.0", a_iPort);
+  // -------------------------------------
+  // 종료 처리
+  // -------------------------------------
+  // 통계 업데이트 쓰레드 종료
   m_bRunStatsLoop.store(false);
   if (m_oStatsThread.joinable())
   {
     m_oStatsThread.join();
   }
   m_oShmStatsProducer.Shutdown();
+  // 서버 종료 오류 처리
   if (!l_bListenOk)
   {
     fprintf(stderr, "[ERR_] HTTPS 서버 listen 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
-  
+  // -------------------------------------
   return true;
 }
 

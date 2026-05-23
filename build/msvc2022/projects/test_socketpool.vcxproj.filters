@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{40ede4ea-40b2-4902-aedc-15966ef07d6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{0fa3fe0c-a766-426e-a232-2e6037689081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\tests">
+      <UniqueIdentifier>{97614d5b-dd65-4058-b222-6a1faeb5f25f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\SocketPool.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\tests\test_socketpool.cpp">
+      <Filter>src\tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\common\SocketPool.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

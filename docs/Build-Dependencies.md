@@ -20,12 +20,14 @@
 
 ## 의존 라이브러리들 구조
 ```markdown
+- llhttp        = HTTP
 - cpp-httplib   = HTTP + OpenSSL
 - liboqs        = OpenSSL + PQC
 - oqs-provider  = OpenSSL + liboqs
 - TLS + PQC
-  * Client (OpenSSL + cpp-httplib + oqs-provider)
-  * Server (OpenSSL + cpp-httplib + oqs-provider)
+  * Client     (cpp-httplib + OpenSSL + oqs-provider)
+  * Old Server (cpp-httplib + OpenSSL + oqs-provider)
+  * New Server (llhttp      + OpenSSL + oqs-provider)
 ```
 
 ## 의존 라이브러리들 오픈소스 버전 선택
@@ -64,10 +66,10 @@ NIST OID 내장등록 생략하고, OpenSSL에 위임된 것을 사용한다:
       > git clone --branch openssl-3.5.4 --depth 1 https://github.com/openssl/openssl.git
     - 본 버전은 `3.5.4`
     - PKI 체인/인증서 발급
-  * cpp-httplib (C++, MIT)
-    - A C++ header-only HTTP/HTTPS server and client library
-    - 본 버전은 `0.40.0`으로, llama-server에 내장된 것을 사용
-    - OpenSSL, MbedTLS, wolfSSL 등과 연동하면 HTTPS 가능
+  * llhttp (C, MIT)
+    - Port of http_parser to llparse
+    - 본 버전은 `9.4.1`로써, Node.js에 내장된 것을 사용
+    - 고성능 순수 HTTP 로써, TLS 인증은 별도 구현 필요
   * [liboqs (C/Ass/C++/Cuda, MIT)](https://github.com/open-quantum-safe/liboqs/tree/0.13.0)
     - C library for prototyping and experimenting with quantum-resistant cryptography
     - 본 버전은 `0.13.0`
@@ -77,6 +79,10 @@ NIST OID 내장등록 생략하고, OpenSSL에 위임된 것을 사용한다:
     - OpenSSL 3 provider containing post-quantum algorithms
     - 본 버전은 `0.9.0`
     - 차세대 양자 알고리즘을 포함하는 OpenSSL 3 공급자
+  * cpp-httplib (C++, MIT)
+    - A C++ header-only HTTP/HTTPS server and client library
+    - 본 버전은 `0.40.0`으로, llama-server에 내장된 것을 사용
+    - OpenSSL, MbedTLS, wolfSSL 등과 연동하면 HTTPS 가능
   
 ## 의존 라이브러리들 소스 빌드 절차
 ```
@@ -113,34 +119,42 @@ NIST OID 내장등록 생략하고, OpenSSL에 위임된 것을 사용한다:
     - 빌드 구성
       > cd cpp-httplib-0.40.0
       > mkdir build && cd build
-      > cmake ..
+      > cmake .. -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
     - 빌드 결과 경로 변경
       1.	`cpphttplib_ssl.sln` 파일을 MSVC에서 열기
-      2.	구성=Release 선택
-      3.	좌측 `cpp-httplib-0.40.0` 프로젝트를 선택한 후, 속성창(Alt+F7) 열기
-      4. 	출력경로 아래와 같이 변경
-          ..\..\..\projects\JK-PQC\bin\msvc\$(Configuration)\
+      2.	좌측 `cpp-httplib-0.40.0` 프로젝트를 선택한 후, 속성창(Alt+F7) 열기
+      3. 	구성=Debug   선택하고, 출력경로 아래와 같이 변경
+          D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\cpp-httplib\lib\$(Configuration)\
+          D:\E\Study\AI\AutoAgents\projects\JK-PQC\bin\msvc\$(Configuration)\
+      4.  구성=Release 선택하고, 출력경로 동일하게 변경
     - 빌드 수행
-      > msbuild ALL_BUILD.vcxproj /p:Configuration=Release /m:8
+      > msbuild ALL_BUILD.vcxproj /p:Configuration=Debug /m:8
+        msbuild ALL_BUILD.vcxproj /p:Configuration=Release /m:8
+    - 빌드 결과물 수동 설치
+      > MKDIR "D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\cpp-httplib\include\"
+      > COPY /B /Y "..\httplib.h" "D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\cpp-httplib\include\"
+    - 빌드 결과물 삭제
+      > RMDIR /S /Q .
 3.  liboqs (0.13.0)
     - 빌드 구성
       > cd liboqs-0.13.0
       > mkdir build && cd build
-      > cmake .. -DOQS_USE_OPENSSL=ON -DOQS_USE_AES_OPENSSL=ON -DOQS_USE_SHA2_OPENSSL=ON -DOQS_USE_SHA3_OPENSSL=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX="D:/liboqs"
+      > cmake .. -DOQS_USE_OPENSSL=ON -DOQS_USE_AES_OPENSSL=ON -DOQS_USE_SHA2_OPENSSL=ON -DOQS_USE_SHA3_OPENSSL=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX="D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/liboqs"
     - 빌드 수행
       > msbuild ALL_BUILD.vcxproj /p:Configuration=Debug /m:8
         msbuild ALL_BUILD.vcxproj /p:Configuration=Release /m:8
     - 빌드 설치
       > msbuild INSTALL.vcxproj /p:Configuration=Debug
         msbuild INSTALL.vcxproj /p:Configuration=Release
-    - 프로젝트에 결과물 복제 후, 코드 변경
-      > "./JK-PQC/bin/msvc/Debug/liboqs/lib/pkgconfig/liboqs.pc" 파일을 열고, "D:/liboqs" 경로를 아래와 같이 변경
-        "D:/E/Study/AI/AutoAgents/projects/JK-PQC/bin/msvc/Debug/liboqs"
+    - 설치 결과물 코드 확인/변경
+      > "JK-PQC/deps/liboqs/include/oqs/..."
+      > "JK-PQC/deps/liboqs/lib/pkgconfig/liboqs.pc" 파일을 열고, 경로가 올바른지 확인 : pc파일은 pkg-config 툴이 로드하는 라이브러리 메타데이터 파일입니다.
+          prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/liboqs
     - 빌드 결과물 삭제
       > RMDIR /S /Q .
     - 환경 변수 등록 (Release 버전 필수)
-      > SETX liboqs_ROOT      "D:\E\Study\AI\AutoAgents\projects\JK-PQC\bin\msvc\Release\liboqs"
-      > SETX liboqs_DIR       "D:\E\Study\AI\AutoAgents\projects\JK-PQC\bin\msvc\Release\liboqs\lib\cmake\liboqs"
+      > SETX liboqs_ROOT      "D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\liboqs"
+      > SETX liboqs_DIR       "D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\liboqs\lib\cmake\liboqs"
 4.  oqs-provider (0.9.0)
     - 사전 체크
       > openssl -v
@@ -153,13 +167,20 @@ NIST OID 내장등록 생략하고, OpenSSL에 위임된 것을 사용한다:
     - 빌드 구성
       > cd oqs-provider-0.9.0
       > mkdir build && cd build
-      > cmake .. -DOQS_ALGS_ENABLED=STD -DCMAKE_INSTALL_PREFIX="D:/oqs-provider"
+      > cmake .. -DCMAKE_INSTALL_PREFIX="D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/oqs-provider"
     - 빌드 수행
       > msbuild ALL_BUILD.vcxproj /p:Configuration=Debug /m:8
         msbuild ALL_BUILD.vcxproj /p:Configuration=Release /m:8
     - 빌드 설치
       > msbuild INSTALL.vcxproj /p:Configuration=Debug
         msbuild INSTALL.vcxproj /p:Configuration=Release
+    - 설치 결과물 이진파일들 확인
+      > oqsprovider.dll 파일은 OpenSSL 경로에 설치됩니다.
+        D:/openssl/3.5.4/lib/ossl-modules/oqsprovider.dll
+      > 개발에 필요한 파일들은 수동으로 복제해야 합니다.
+        XCOPY /S /Y ".\lib" "D:\E\Study\AI\AutoAgents\projects\JK-PQC\_deps\oqs-provider\lib\"
+    - 설치 결과물 헤더파일 확인
+      > "JK-PQC/deps/oqs-provider/include/oqs-provider/oqs_prov.h"
     - 빌드 결과물 삭제
       > RMDIR /S /Q .
     - OpenSSL에 Provider 등록
@@ -189,4 +210,28 @@ NIST OID 내장등록 생략하고, OpenSSL에 위임된 것을 사용한다:
         > where oqsprovider.dll
         > dumpbin /dependents D:\openssl\3.5.4\lib\ossl-modules\oqsprovider.dll
         > where libcrypto-3-x64.dll
+5.  llhttp (9.4.1)
+    - 빌드 구성
+      > "https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.1.zip" 다운로드 및 압축 해제
+      > cd llhttp-release-v9.4.1
+      > mkdir build && cd build
+      > /MT or /MTd
+        cmake .. -DLLHTTP_BUILD_SHARED_LIBS=OFF -DLLHTTP_BUILD_STATIC_LIBS=ON -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_INSTALL_PREFIX="D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp"
+        /MD
+        cmake .. -DLLHTTP_BUILD_SHARED_LIBS=OFF -DLLHTTP_BUILD_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX="D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp"
+    - 빌드 수행
+      > msbuild ALL_BUILD.vcxproj /p:Configuration=Debug /m:8
+        msbuild ALL_BUILD.vcxproj /p:Configuration=Release /m:8
+    - 빌드 설치
+      > msbuild INSTALL.vcxproj /p:Configuration=Debug
+        msbuild INSTALL.vcxproj /p:Configuration=Release
+    - 설치 결과물 코드 확인/변경
+      > "JK-PQC/deps/libllhttp/include/llhttp.h"
+      > "JK-PQC/deps/libllhttp/lib/pkgconfig/libllhttp.pc" 파일을 열고, 경로가 올바른지 확인 : pc파일은 pkg-config 툴이 로드하는 라이브러리 메타데이터 파일입니다.
+          prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp
+          exec_prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/bin
+          libdir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/lib
+          includedir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/include
+    - 빌드 결과물 삭제
+      > RMDIR /S /Q .
 ```

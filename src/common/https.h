@@ -47,12 +47,13 @@ public:
   // -------------------------------------
 protected:
   virtual const SSL_METHOD* createMethod() = 0;   // 파생 클래스별 TLS 메소드를 리턴한다.
-  bool applyCommonTlsOptions();                   // 공통 TLS 옵션을 적용한다.
-  bool loadCertificates(bool a_bRequirePeerCert); // 인증서/키/검증 정책을 적용한다.
+  bool      applyCommonTlsOptions();                   // 공통 TLS 옵션을 적용한다.
+  bool      loadCertificates(bool a_bRequirePeerCert); // 인증서/키/검증 정책을 적용한다.
   // -------------------------------------
 private:
   int       _winsock_Init();    // Winsock 초기화를 수행하고, 결과 코드를 리턴한다. (0=성공, 기타=실패)
   void      _winsock_Close();   // Winsock 정리를 수행한다.
+
   SSL_CTX*    m_pSslCtx;        // SSL_CTX 포인터
   bool        m_bWinsockInited; // Winsock 초기화 성공 여부
 protected:
@@ -82,16 +83,19 @@ class CHttpsServer : public CHttpsBase
 public:
   CHttpsServer();
   virtual ~CHttpsServer();
-  bool Run(int a_iPort); // HTTPS 서버를 구동한다.
+
+  bool Run(int a_iPort);    // HTTPS 서버를 구동한다.
   // -------------------------------------
 protected:
   virtual const SSL_METHOD* createMethod() override;
-  void _updateStatsLoop(); // 공유 메모리 통계 업데이트 루프
+  // -------------------------------------
+private:
+  void              _updateStatsLoop();   // 공유 메모리 통계 업데이트 루프
 
 private:
-  CShmStatsProducer m_oShmStatsProducer; // 공유 메모리 통계 프로듀서
-  std::atomic<bool> m_bRunStatsLoop;     // 업데이트 루프 실행 여부
-  std::thread m_oStatsThread;            // 통계 업데이트 스레드
+  CShmStatsProducer m_oShmStatsProducer;  // 공유 메모리 통계 프로듀서
+  std::atomic<bool> m_bRunStatsLoop;      // 업데이트 루프 실행 여부
+  std::thread       m_oStatsThread;       // 통계 업데이트 스레드
 };
 
 /*----------------------------------------------------------------------------+-

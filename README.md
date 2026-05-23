@@ -14,10 +14,13 @@
 - liboqs (0.13.0) : https://github.com/open-quantum-safe/liboqs/tree/0.13.0
 - oqs-provider (0.9.0) : https://github.com/open-quantum-safe/oqs-provider/tree/0.9.0
 - cpp-httplib (0.40.0) : https://github.com/ggml-org/llama.cpp/tree/master/vendor/cpp-httplib
+- llhttp (9.4.1) : https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.1.zip
 
 ---
 
 ## 목차
+- [개발 이력](#개발-이력)
+- [사전 학습](#사전-학습)
 - [전체 폴더/파일 구성](#전체-폴더파일-구성)
 - [개발 범위](#개발-범위)
   - [구현 기능](#구현-기능)
@@ -36,8 +39,25 @@
   - [주요 폴더/파일 설명](#주요-폴더파일-설명)
   - [실행 절차](#실행-절차)
   - [결과 로그](#결과-로그)
+- [License](#license)
 
 ---
+
+## 개발 이력
+- [2026.05.23 ~           ] 고성능 PQC 서버(jk-pqc-server) 설계/개발 시작
+- [2026.05.23 ~ 2026.05.23] cpp-httplib, liboqs, oqs-provider 설치 경로 변경 (include, bin > src/common, _deps)
+  ```bash
+  git rm -r "./include"
+  git rm -r "./bin"
+  ```
+- [2026.05.18 ~ 2026.05.19] GitHub 등록
+- [2026.04.21 ~ 2026.05.16] Windows PQC mTLS 인증 시스템 구축
+
+---
+
+## 사전 학습
+* [Gemini QnA](docs/Gemini.md)
+* [Claude QnA](docs/ClaudeChat.md)
 
 ## 전체 폴더/파일 구성
 [상세 보기](docs/Files-Structure.md)

@@ -9,12 +9,7 @@ pre-certs/
 *.bkp
 
 # Generated folders
-bin/gcc/
-bin/msvc/Debug/*.lib
-bin/msvc/Debug/*.exp
-
-bin/msvc/Debug/obj/**
-bin/msvc/Release/obj/**
+bin/
 
 # build/msvc
 build/msvc2022/.vs/**
@@ -23,4 +18,4 @@ build/msvc2022/Release/**
 build/msvc2022/projects/*.user
 
 # resources
-
+docs/.garbage
