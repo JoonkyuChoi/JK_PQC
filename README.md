@@ -120,8 +120,6 @@ mTLS의 경우, 양방향 상호 TLS 인증을 의미하며, 여기에 PQC를 �
   - 동기 방식 서버는 학습, 실험용으로 실용 가치가 떨어집니다.
 - `jk-pqc-server` 어플은 실용적인 `IOCP/epoll`을 적용한 고성능 HTTPS로 `Hybrid mTLS` 인증을 구현한 것입니다.
   - 비동기 방식이며, NonBlocking 소켓을 사용하고, 설정한 수량의 쓰레드들이 소켓풀에 스캐줄링된 소켓들을 담당합니다.
-  - `jk-pqc-mtls-org.dll`은 `Hybrid mTLS` 인증을 모듈화한 `일반적인 동적 라이브러리` 입니다.
-  - `jk-pqc-mtls-lua.dll`은 `Hybrid mTLS` 인증을 모듈화한 `LuaJIT 가능 동적 라이브러리` 입니다.
 - `jk-https-dashboard`는 일반 TLS로 구현된 (실시간 접속정보 감시용) 대시보드 API서버입니다.
 
 ### 브라우저 접속 화면들
