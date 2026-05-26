@@ -8,8 +8,6 @@ pre-certs/
 *.pdb
 *.bkp
 *.log
-server-err.txt
-server-out.txt
 
 # Generated folders
 bin/

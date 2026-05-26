@@ -317,10 +317,16 @@ JK-PQC/
       ├── common/                       # 공통 소스코드 폴더
       │   ├── https.h                  # "mTLS + PQC + HTTPS" 통신 클래스(CHttpsBase/CHttpsServer/CHttpsClient) 정의
       │   ├── https.cpp                # "mTLS + PQC + HTTPS" 통신 클래스(CHttpsBase/CHttpsServer/CHttpsClient) 구현
+      │   ├── json.hpp                 # JSON for Modern C++ version 3.12.0
       │   ├── pqc_utils.h              # PQC 초기화, oqs-provider 로드 등 공통 유틸 정의
       │   ├── pqc_utils.cpp            # PQC 초기화, oqs-provider 로드 등 공통 유틸 구현
+      │   ├── pqchttps.h               # CSocketPool + llhttp + OpenSSL Hybrid mTLS HTTP 서버 모듈 정의
+      │   ├── pqchttps.cpp             # CSocketPool + llhttp + OpenSSL Hybrid mTLS HTTP 서버 모듈 구현
+      │   ├── root_page.h              # "jk-pqc-server" 루트 페이지
       │   ├── shm_stats.h              # "jk-https-server, jk-pqc-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 정의
-      │   └── shm_stats.cpp            # "jk-https-server, jk-pqc-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 구현
+      │   ├── shm_stats.cpp            # "jk-https-server, jk-pqc-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 구현
+      │   ├── SocketPool.h             # Windows IOCP / Linux epoll 기반 IPv4/IPv6 실시간 소켓풀 클래스 정의
+      │   └── SocketPool.cpp           # Windows IOCP / Linux epoll 기반 IPv4/IPv6 실시간 소켓풀 클래스 구현
       ├── servers/                      # 서버 어플 관련 소스코드 폴더
       │   ├── jk-https-server.cpp      # "mTLS + PQC + HTTPS" 인증 서버 시작 파일 (Blocking 소켓 동기 방식)
       │   ├── jk-mtls-server.cpp       # "mTLS + PQC + TCP" 인증 서버 시작 파일
@@ -331,7 +337,8 @@ JK-PQC/
       │   ├── shm_consumer.h           # "jk-https-dashboard 공유메모리 통계" 리더 클래스(CShmStatsConsumer) 정의
       │   └── shm_consumer.cpp         # "jk-https-dashboard 공유메모리 통계" 리더 클래스(CShmStatsConsumer) 구현
       └── tests/                        # 테스트 어플 관련 소스코드 폴더
-           └── test_provider.c          # OpenSSL용 [oqsprovider] 로드 테스트
+           ├── test_provider.c          # OpenSSL용 [oqsprovider] 로드 테스트
+           └── test_socketpool.cpp      # CSocketPool 테스트
 ```
 
 ### 실행 절차
