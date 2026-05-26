@@ -5,7 +5,6 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msvc2022", "msvc2022", "{BC847066-0387-4F6C-A531-56A5BAF47A95}"
 	ProjectSection(SolutionItems) = preProject
-		gabage.txt = gabage.txt
 		msvc-settings.md = msvc-settings.md
 	EndProjectSection
 EndProject
@@ -58,6 +57,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{ADCCEF6F-E5F0-4843-AC30-3B85EEF4062A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_socketpool", "projects\test_socketpool.vcxproj", "{737A959A-3CEF-40AC-BC8D-BDD2F110CC78}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jk-pqc-server", "projects\jk-pqc-server.vcxproj", "{33DD1F10-D3D9-484A-A2B9-889C870778A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,6 +124,14 @@ Global
 		{737A959A-3CEF-40AC-BC8D-BDD2F110CC78}.Release|Win32.Build.0 = Release|Win32
 		{737A959A-3CEF-40AC-BC8D-BDD2F110CC78}.Release|x64.ActiveCfg = Release|x64
 		{737A959A-3CEF-40AC-BC8D-BDD2F110CC78}.Release|x64.Build.0 = Release|x64
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Debug|Win32.Build.0 = Debug|Win32
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Debug|x64.ActiveCfg = Debug|x64
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Debug|x64.Build.0 = Debug|x64
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Release|Win32.ActiveCfg = Release|Win32
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Release|Win32.Build.0 = Release|Win32
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Release|x64.ActiveCfg = Release|x64
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +156,7 @@ Global
 		{64F2C5D3-70CE-4466-9A17-CE874070B708} = {EF01C8FB-C41A-4DAE-8520-B1A48946E14A}
 		{ADCCEF6F-E5F0-4843-AC30-3B85EEF4062A} = {EF01C8FB-C41A-4DAE-8520-B1A48946E14A}
 		{737A959A-3CEF-40AC-BC8D-BDD2F110CC78} = {64F2C5D3-70CE-4466-9A17-CE874070B708}
+		{33DD1F10-D3D9-484A-A2B9-889C870778A3} = {ADCCEF6F-E5F0-4843-AC30-3B85EEF4062A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1BE534F5-8B64-423E-B5CB-28F5E1A641CB}

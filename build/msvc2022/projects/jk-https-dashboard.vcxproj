@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>Default</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
@@ -130,7 +130,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -176,7 +176,7 @@ del "$(TargetDir)$(TargetName).lib"
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\_deps\cpp-httplib\include;..\..\..\_deps\liboqs\include;..\..\..\_deps\oqs-provider\include;</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

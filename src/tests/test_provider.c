@@ -25,11 +25,11 @@ int main()
   OSSL_PROVIDER* oqs = OSSL_PROVIDER_load(NULL, "oqsprovider");
   if (!oqs)
   {
-    fprintf(stderr, "OSSL_PROVIDER_load failed:\n");
+    printf("[ERR_] OSSL_PROVIDER_load failed:\n");
     ERR_print_errors_fp(stderr);
     return 1;
   }
-  printf("oqsprovider loaded OK\n");
+  printf("[INFO] oqsprovider loaded OK\n");
   OSSL_PROVIDER_unload(oqs);
 
   return 0;

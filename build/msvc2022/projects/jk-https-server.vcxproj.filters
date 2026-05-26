@@ -35,5 +35,8 @@
     <ClInclude Include="..\..\..\src\common\shm_stats.h">
       <Filter>src\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\common\json.hpp">
+      <Filter>src\common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

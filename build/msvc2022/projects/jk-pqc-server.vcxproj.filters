@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\pqc_utils.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\shm_stats.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\servers\jk-pqc-server.cpp">
+      <Filter>src\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\servers\jk-pqc-server-routes.cpp">
+      <Filter>src\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\SocketPool.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\common\pqchttps.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{3b134222-9eb0-49a4-9886-a821344ab2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{eca1945e-8c64-499a-a74a-39b1c7dae3fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\servers">
+      <UniqueIdentifier>{ebb2b809-275e-42c0-a41c-01e7e699a35a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\common\pqc_utils.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\shm_stats.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\SocketPool.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\pqchttps.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\json.hpp">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\root_page.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\servers\jk-pqc-server.h">
+      <Filter>src\servers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\config.json" />
+  </ItemGroup>
+</Project>

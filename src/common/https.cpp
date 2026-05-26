@@ -38,7 +38,7 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 // -----------------------------------------------------------------------------
 // [VARIABLES]
 // -----------------------------------------------------------------------------
-// 브라우저 응답
+// jk-https-server GET / 브라우저용 HTML (text/html)
 static const char* const s_cpszRootHtml = R"(<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -182,7 +182,7 @@ bool CHttpsBase::Init(OSSL_LIB_CTX* a_ptLibCtx, const std::string& a_rstrKEM, bo
   }
   if (_winsock_Init() != 0)
   {
-    fprintf(stderr, "[ERR_] WSAStartup 실패\n");
+    printf("[ERR_] WSAStartup 실패\n");
     return false;
   }
   m_bWinsockInited = true;
@@ -244,12 +244,12 @@ bool CHttpsBase::applyCommonTlsOptions()
 {
   if (m_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 미초기화 상태\n");
+    printf("[ERR_] SSL_CTX 미초기화 상태\n");
     return false;
   }
   if (SSL_CTX_set1_groups_list(m_pSslCtx, m_strKEM.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -341,7 +341,7 @@ int CHttpsBase::smfClientHelloCb(SSL* a_pSsl, int* a_piAlert, void* a_pvArg)
   if ((SSL_use_certificate_file(a_pSsl, l_cpszCertPath, SSL_FILETYPE_PEM) != 1) ||
       (SSL_use_PrivateKey_file (a_pSsl, l_cpszKeyPath , SSL_FILETYPE_PEM) != 1))
   {
-    fprintf(stderr, "[ERR_:%s:%05d:%04X] 이중 인증서 로드 실패: %s\n", l_szPeerAddr, l_iPeerPort, l_uiConnId, l_cpszCertPath);
+    printf("[ERR_:%s:%05d:%04X] 이중 인증서 로드 실패: %s\n", l_szPeerAddr, l_iPeerPort, l_uiConnId, l_cpszCertPath);
     if (a_piAlert != nullptr)
       *a_piAlert = SSL_AD_INTERNAL_ERROR;
     return SSL_CLIENT_HELLO_ERROR;
@@ -354,17 +354,17 @@ bool CHttpsBase::loadCertificates(bool a_bRequirePeerCert)
 {
   if (m_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 미초기화 상태\n");
+    printf("[ERR_] SSL_CTX 미초기화 상태\n");
     return false;
   }
   if (m_strCaPath.empty() || m_strCertPath.empty() || m_strKeyPath.empty())
   {
-    fprintf(stderr, "[ERR_] 인증서 경로 미설정\n");
+    printf("[ERR_] 인증서 경로 미설정\n");
     return false;
   }
   if (m_bDualCert && (m_strEcdsaCertPath.empty() || m_strEcdsaKeyPath.empty()))
   {
-    fprintf(stderr, "[ERR_] ECDSA 인증서 경로 미설정\n");
+    printf("[ERR_] ECDSA 인증서 경로 미설정\n");
     return false;
   }
   // mTLS 설정: 클라이언트 인증서 요구 여부에 따라 검증 모드를 설정한다.
@@ -460,13 +460,13 @@ bool CHttpsServer::Run(int a_iPort)
     if (m_strCaPath.empty() || m_strCertPath.empty() || m_strKeyPath.empty() ||
         m_strEcdsaCaPath.empty() || m_strEcdsaCertPath.empty() || m_strEcdsaKeyPath.empty())
     {
-      fprintf(stderr, "[ERR_] 이중 인증서 경로 미설정\n");
+      printf("[ERR_] 이중 인증서 경로 미설정\n");
       return false;
     }
   }
   else if (m_strCaPath.empty() || m_strCertPath.empty() || m_strKeyPath.empty())
   {
-    fprintf(stderr, "[ERR_] 인증서 경로 미설정\n");
+    printf("[ERR_] 인증서 경로 미설정\n");
     return false;
   }
   // -------------------------------------
@@ -489,7 +489,7 @@ bool CHttpsServer::Run(int a_iPort)
       if ((where & SSL_CB_HANDSHAKE_DONE) != 0)
       {
         printf("----------------------------------------\n");
-        printf("[ACPT] %s Handshake done\n", SSL_get_version(ssl));
+        printf("[INFO] ACPT %s Handshake done\n", SSL_get_version(ssl));
       }
     });
 
@@ -524,14 +524,14 @@ bool CHttpsServer::Run(int a_iPort)
   // -------------------------------------
   if (!l_oServer.is_valid())
   {
-    fprintf(stderr, "[ERR_] httplib::SSLServer 초기화 실패\n");
+    printf("[ERR_] httplib::SSLServer 초기화 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
   SSL_CTX* l_pSslCtx = static_cast<SSL_CTX*>(l_oServer.tls_context());
   if (l_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 획득 실패\n");
+    printf("[ERR_] SSL_CTX 획득 실패\n");
     return false;
   }
   /*------------------------------------+-
@@ -543,13 +543,13 @@ bool CHttpsServer::Run(int a_iPort)
   -+------------------------------------*/
   if (SSL_CTX_set1_groups_list(l_pSslCtx, m_strKEM.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }
   if (!m_oShmStatsProducer.Init())
   {
-    fprintf(stderr, "[ERR_] CShmStatsProducer 초기화 실패\n");
+    printf("[ERR_] CShmStatsProducer 초기화 실패\n");
     return false;
   }
   // -------------------------------------
@@ -562,7 +562,7 @@ bool CHttpsServer::Run(int a_iPort)
   // -------------------------------------
   l_oServer.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res)
   {
-    printf("[REQ_:%s:%05d] %s %s\n", req.remote_addr.c_str(), req.remote_port, req.method.c_str(), req.path.c_str());
+    printf("[INFO] REQ_ %s:%05d %s %s\n", req.remote_addr.c_str(), req.remote_port, req.method.c_str(), req.path.c_str());
     return httplib::Server::HandlerResponse::Unhandled;
   });
   // -----------------------------------------------------------------------------
@@ -774,7 +774,7 @@ bool CHttpsServer::Run(int a_iPort)
   // -------------------------------------
   // 서버 시작
   // -------------------------------------
-  printf("서버 대기 중 : 0.0.0.0:%d\n", a_iPort);
+  printf("[INFO] 서버 대기 중 : 0.0.0.0:%d\n", a_iPort);
   const bool l_bListenOk = l_oServer.listen("0.0.0.0", a_iPort);
   // -------------------------------------
   // 종료 처리
@@ -789,7 +789,7 @@ bool CHttpsServer::Run(int a_iPort)
   // 서버 종료 오류 처리
   if (!l_bListenOk)
   {
-    fprintf(stderr, "[ERR_] HTTPS 서버 listen 실패\n");
+    printf("[ERR_] HTTPS 서버 listen 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -832,20 +832,20 @@ bool CHttpsClient::Get(const std::string& a_rstrHost, int a_iPort, const std::st
 {
   if (m_strCaPath.empty() || m_strCertPath.empty() || m_strKeyPath.empty())
   {
-    fprintf(stderr, "[ERR_] 인증서 경로 미설정\n");
+    printf("[ERR_] 인증서 경로 미설정\n");
     return false;
   }
   httplib::SSLClient l_oClient(a_rstrHost, a_iPort, m_strCertPath, m_strKeyPath);
   if (!l_oClient.is_valid())
   {
-    fprintf(stderr, "[ERR_] httplib::SSLClient 초기화 실패\n");
+    printf("[ERR_] httplib::SSLClient 초기화 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
   std::ifstream l_oCaFile(m_strCaPath, std::ios::binary);
   if (!l_oCaFile.is_open())
   {
-    fprintf(stderr, "[ERR_] CA 인증서 파일 열기 실패: %s\n", m_strCaPath.c_str());
+    printf("[ERR_] CA 인증서 파일 열기 실패: %s\n", m_strCaPath.c_str());
     return false;
   }
   std::stringstream l_oBuffer;
@@ -868,12 +868,12 @@ bool CHttpsClient::Get(const std::string& a_rstrHost, int a_iPort, const std::st
   SSL_CTX* l_pSslCtx = static_cast<SSL_CTX*>(l_oClient.tls_context());
   if (l_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 획득 실패\n");
+    printf("[ERR_] SSL_CTX 획득 실패\n");
     return false;
   }
   if (SSL_CTX_set1_groups_list(l_pSslCtx, m_strKEM.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -881,7 +881,7 @@ bool CHttpsClient::Get(const std::string& a_rstrHost, int a_iPort, const std::st
   if (!l_oResult)
   {
     auto err = l_oResult.error();
-    fprintf(stderr, "[ERR_] HTTPS 요청 실패: %s\n", httplib::to_string(err).c_str());
+    printf("[ERR_] HTTPS 요청 실패: %s\n", httplib::to_string(err).c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -895,20 +895,20 @@ bool CHttpsClient::Post(const std::string& a_rstrHost, int a_iPort, const std::s
 {
   if (m_strCaPath.empty() || m_strCertPath.empty() || m_strKeyPath.empty())
   {
-    fprintf(stderr, "[ERR_] 인증서 경로 미설정\n");
+    printf("[ERR_] 인증서 경로 미설정\n");
     return false;
   }
   httplib::SSLClient l_oClient(a_rstrHost, a_iPort, m_strCertPath, m_strKeyPath);
   if (!l_oClient.is_valid())
   {
-    fprintf(stderr, "[ERR_] httplib::SSLClient 초기화 실패\n");
+    printf("[ERR_] httplib::SSLClient 초기화 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
   std::ifstream l_oCaFile(m_strCaPath, std::ios::binary);
   if (!l_oCaFile.is_open())
   {
-    fprintf(stderr, "[ERR_] CA 인증서 파일 열기 실패: %s\n", m_strCaPath.c_str());
+    printf("[ERR_] CA 인증서 파일 열기 실패: %s\n", m_strCaPath.c_str());
     return false;
   }
   std::stringstream l_oBuffer;
@@ -921,12 +921,12 @@ bool CHttpsClient::Post(const std::string& a_rstrHost, int a_iPort, const std::s
   SSL_CTX* l_pSslCtx = static_cast<SSL_CTX*>(l_oClient.tls_context());
   if (l_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 획득 실패\n");
+    printf("[ERR_] SSL_CTX 획득 실패\n");
     return false;
   }
   if (SSL_CTX_set1_groups_list(l_pSslCtx, m_strKEM.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", m_strKEM.c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -934,7 +934,7 @@ bool CHttpsClient::Post(const std::string& a_rstrHost, int a_iPort, const std::s
   if (!l_oResult)
   {
     auto err = l_oResult.error();
-    fprintf(stderr, "[ERR_] HTTPS 요청 실패: %s\n", httplib::to_string(err).c_str());
+    printf("[ERR_] HTTPS 요청 실패: %s\n", httplib::to_string(err).c_str());
     ERR_print_errors_fp(stderr);
     return false;
   }

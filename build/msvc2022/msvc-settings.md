@@ -188,13 +188,13 @@ libssl.lib;libcrypto.lib;cpp-httplib-0.40.0.lib;oqs.lib;oqsprovider.lib;ws2_32.l
 jk-pqc-server         jk-pqc-server.exe       _CRT_SECURE_NO_WARNINGS     $(OPENSSL_ROOT_DIR)\include $(OPENSSL_ROOT_DIR)\lib               libssl.lib;libcrypto.lib        ..\..\..\bin\msvc\$(Configuration)\   $(OutDir)\obj\$(ProjectName)\
                                               STRSAFE_NO_DEPRECATE        ..\..\..\src\servers	                                            ws2_32.lib;
                                               CPPHTTPLIB_OPENSSL_SUPPORT  ..\..\..\src\common
-                                        ..\..\..\_deps\$(Configuration)\liboqs\include    ..\..\..\_deps\$(Configuration)\liboqs\lib        oqs.lib
+                                        ..\..\..\_deps\liboqs\include                     ..\..\..\_deps\liboqs\lib                         oqs.lib
                                         ..\..\..\_deps\oqs-provider\include               ..\..\..\_deps\oqs-provider\lib\$(Configuration)  oqsprovider.lib
                                         ..\..\..\_deps\libllhttp\include                  ..\..\..\_deps\libllhttp\lib                      llhttp.lib
 
 _CRT_SECURE_NO_WARNINGS;STRSAFE_NO_DEPRECATE;CPPHTTPLIB_OPENSSL_SUPPORT
-$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\_deps\$(Configuration)\liboqs\include;..\..\..\_deps\oqs-provider\include;..\..\..\_deps\libllhttp\include;
-$(OPENSSL_ROOT_DIR)\lib;..\..\..\_deps\$(Configuration)\liboqs\lib;..\..\..\_deps\oqs-provider\lib\$(Configuration);..\..\..\_deps\libllhttp\lib;
+$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\_deps\liboqs\include;..\..\..\_deps\oqs-provider\include;..\..\..\_deps\libllhttp\include;
+$(OPENSSL_ROOT_DIR)\lib;..\..\..\_deps\liboqs\lib;..\..\..\_deps\oqs-provider\lib\$(Configuration);..\..\..\_deps\libllhttp\lib;
 libssl.lib;libcrypto.lib;oqs.lib;oqsprovider.lib;llhttp.lib;ws2_32.lib;
 --------------------
 tests

@@ -25,6 +25,7 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 
 #include "pqc_utils.h"
 
+// Winsock 2.2 초기화 (0=성공, 그 외 WSAStartup 오류 코드)
 static int sfInitWinsock()
 {
   WSADATA l_tWsaData = { 0 };
@@ -48,7 +49,7 @@ int main(int a_iArgc, char** a_ppszArgv)
     {
       if ((l_i + 1) >= a_iArgc)
       {
-        fprintf(stderr, "[ERR_] --kem 옵션에 값이 필요합니다.\n");
+        printf("[ERR_] --kem 옵션에 값이 필요합니다.\n");
         return 1;
       }
       l_strKemOpt = a_ppszArgv[++l_i];
@@ -119,13 +120,13 @@ int main(int a_iArgc, char** a_ppszArgv)
     ERR_print_errors_fp(stderr);
     goto FINALIZE;
   }
-  printf("KEM Groups  : %s\n", l_strKemGroups.c_str());
+  printf("[INFO] KEM Groups  : %s\n", l_strKemGroups.c_str());
   // -----------------
   // Hybrid KEM 그룹 설정 (서버와 동일한 그룹 사용)
   // -----------------
   if (SSL_CTX_set1_groups_list(l_pSslCtx, l_strKemGroups.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", l_strKemGroups.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", l_strKemGroups.c_str());
     ERR_print_errors_fp(stderr);
     goto FINALIZE;
   }
@@ -134,14 +135,14 @@ int main(int a_iArgc, char** a_ppszArgv)
   // -------------------------------------
   if (sfInitWinsock() != 0)
   {
-    fprintf(stderr, "[ERR_] WSAStartup 실패\n");
+    printf("[ERR_] WSAStartup 실패\n");
     goto FINALIZE;
   }
 
   l_hSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (l_hSock == INVALID_SOCKET)
   {
-    fprintf(stderr, "[ERR_] socket 생성 실패\n");
+    printf("[ERR_] socket 생성 실패\n");
     goto FINALIZE;
   }
 
@@ -149,7 +150,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   l_tAddr.sin_port = htons(static_cast<u_short>(atoi(l_cpszServerPort)));
   if (inet_pton(AF_INET, l_cpszServerIp, &l_tAddr.sin_addr) != 1)
   {
-    fprintf(stderr, "[ERR_] 서버 IP 파싱 실패\n");
+    printf("[ERR_] 서버 IP 파싱 실패\n");
     goto FINALIZE;
   }
   // -----------------
@@ -157,7 +158,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   // -----------------
   if (connect(l_hSock, reinterpret_cast<sockaddr*>(&l_tAddr), sizeof(l_tAddr)) == SOCKET_ERROR)
   {
-    fprintf(stderr, "[ERR_] connect 실패\n");
+    printf("[ERR_] connect 실패\n");
     goto FINALIZE;
   }
   // -----------------
@@ -184,7 +185,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   if (l_iRecvLen > 0)
   {
     l_cRecvBuffer[l_iRecvLen] = '\0';
-    printf("Server Response: %s\n", l_cRecvBuffer);
+    printf("[INFO] Server Response: %s\n", l_cRecvBuffer);
   }
   else
   {

@@ -17,11 +17,15 @@ Copyright		: 2026~ by Joonkyu Choi, All rights reserved.
 // 플랫폼별 헬퍼
 // =============================================================================
 #ifdef _WIN32
+// OS 소켓 핸들을 closesocket()으로 닫는 플랫폼 래퍼
 static void sfCloseRaw(socket_t a_tSock) { closesocket(a_tSock); }
+// Winsock 마지막 오류 코드(WSAGetLastError) 반환
 static int  sfErrno   ()                 { return static_cast<int>(WSAGetLastError()); }
 #else
 #  include <cerrno>
+// POSIX 소켓 fd를 close()로 닫는 플랫폼 래퍼
 static void sfCloseRaw(socket_t a_tSock) { ::close(a_tSock); }
+// errno 값 반환
 static int  sfErrno   ()                 { return errno; }
 #endif
 
@@ -223,6 +227,18 @@ void CSocketPool::Disconnect(socket_t a_tSock)
 }
 
 // =============================================================================
+// RequestClose : IOCP 수신 콜백 안에서 호출 ? 콜백 반환 후 워커가 소켓 종료
+// =============================================================================
+void CSocketPool::RequestClose(socket_t a_tSock)
+{
+  auto l_oCtx = _FindContext(a_tSock);
+  if (l_oCtx != nullptr)
+  {
+    l_oCtx->m_bClosePending.store(true);
+  }
+}
+
+// =============================================================================
 // Send : 데이터 송신
 // =============================================================================
 bool CSocketPool::Send(socket_t        a_tSock,
@@ -234,33 +250,29 @@ bool CSocketPool::Send(socket_t        a_tSock,
 
   std::lock_guard<std::mutex> l_oLk(l_oCtx->m_oSendMtx);
 
-#ifdef _WIN32
-  auto& l_tOp = l_oCtx->m_tSendOp;
-  memset(&l_tOp.m_tOvlp, 0, sizeof(l_tOp.m_tOvlp));
-  size_t l_ullChunk = (a_ullLen <= D_SP_RECV_BUF_SIZE) ? a_ullLen : D_SP_RECV_BUF_SIZE;
-  memcpy(l_tOp.m_ucBuf, a_pucData, l_ullChunk);
-  l_tOp.m_tWsaBuf.buf = reinterpret_cast<char*>(l_tOp.m_ucBuf);
-  l_tOp.m_tWsaBuf.len = static_cast<ULONG>(l_ullChunk);
-  l_tOp.m_eType       = T_SOCKET_CTX::T_IOCP_OP::eOpType::Send;
-
-  DWORD l_dwSent = 0;
-  int l_iRc = WSASend(a_tSock, &l_tOp.m_tWsaBuf, 1,
-                      &l_dwSent, 0, &l_tOp.m_tOvlp, nullptr);
-  if (l_iRc == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
-    return false;
-  return true;
-#else
+  // TLS 응답은 wbio에서 여러 번 flush될 수 있으므로, Overlapped WSASend 대신
+  // 동기 send()로 전체 길이를 보장한다. (버퍼 덮어쓰기·미완료 송신 방지)
   size_t l_ullOff = 0;
   while (l_ullOff < a_ullLen)
   {
-    ssize_t l_llSent = ::send(a_tSock,
-                              reinterpret_cast<const char*>(a_pucData) + l_ullOff,
-                              a_ullLen - l_ullOff, MSG_NOSIGNAL);
-    if (l_llSent <= 0) return false;
-    l_ullOff += static_cast<size_t>(l_llSent);
+#ifdef _WIN32
+    const int l_iSent = ::send(a_tSock,
+                               reinterpret_cast<const char*>(a_pucData) + l_ullOff,
+                               static_cast<int>(a_ullLen - l_ullOff),
+                               0);
+#else
+    const ssize_t l_iSent = ::send(a_tSock,
+                                   reinterpret_cast<const char*>(a_pucData) + l_ullOff,
+                                   a_ullLen - l_ullOff,
+                                   MSG_NOSIGNAL);
+#endif
+    if (l_iSent <= 0)
+    {
+      return false;
+    }
+    l_ullOff += static_cast<size_t>(l_iSent);
   }
   return true;
-#endif
 }
 
 // =============================================================================
@@ -302,13 +314,77 @@ bool CSocketPool::_ApplySocketOptions(socket_t a_tSock)
 }
 
 // =============================================================================
-// _RegisterContext : 컨텍스트 생성 + IOCP/epoll 등록
+// BeginAcceptedSocket : Accept 직후 컨텍스트·IOCP 등록 (수신 시작 전)
+// =============================================================================
+bool CSocketPool::BeginAcceptedSocket(socket_t           a_tSock,
+                                      const std::string& a_oIp,
+                                      uint16_t           a_usPort)
+{
+  auto l_oCtx          = std::make_shared<T_SOCKET_CTX>();
+  l_oCtx->m_tSock      = a_tSock;
+  l_oCtx->m_eRole      = ROLE_ACCEPTED;
+  l_oCtx->m_oPeerIp    = a_oIp;
+  l_oCtx->m_usPeerPort = a_usPort;
+  l_oCtx->m_bAlive     = true;
+  l_oCtx->m_tLastRecv  = std::chrono::steady_clock::now();
+
+#ifdef _WIN32
+  l_oCtx->m_tRecvOp.m_pCtx  = l_oCtx.get();
+  l_oCtx->m_tRecvOp.m_eType = T_SOCKET_CTX::T_IOCP_OP::eOpType::Recv;
+  l_oCtx->m_tSendOp.m_pCtx  = l_oCtx.get();
+  l_oCtx->m_tSendOp.m_eType = T_SOCKET_CTX::T_IOCP_OP::eOpType::Send;
+
+  if (!CreateIoCompletionPort(reinterpret_cast<HANDLE>(a_tSock),
+                              m_hIocp,
+                              reinterpret_cast<ULONG_PTR>(l_oCtx.get()),
+                              0))
+  {
+    return false;
+  }
+#else
+  // 핸드셰이크 동안 blocking recv 사용 → epoll 등록은 StartRecvForSocket에서
+#endif
+  {
+    std::lock_guard<std::mutex> l_oLk(m_oCtxMtx);
+    m_oCtxMap[a_tSock] = l_oCtx;
+  }
+  return true;
+}
+
+// =============================================================================
+// StartRecvForSocket : 비동기 수신(WSARecv/epoll) 시작
+// =============================================================================
+bool CSocketPool::StartRecvForSocket(socket_t a_tSock)
+{
+  auto l_oCtx = _FindContext(a_tSock);
+  if (!l_oCtx || !l_oCtx->m_bAlive)
+  {
+    return false;
+  }
+#ifdef _WIN32
+  return _PostRecv(*l_oCtx);
+#else
+  _SetNonBlocking(a_tSock);
+  return _AddToEpoll(a_tSock);
+#endif
+}
+
+// =============================================================================
+// _RegisterContext : 컨텍스트 생성 + IOCP/epoll 등록 + 즉시 수신 시작
 // =============================================================================
 bool CSocketPool::_RegisterContext(socket_t           a_tSock,
                                    eSocketRole        a_eRole,
                                    const std::string& a_oIp,
                                    uint16_t           a_usPort)
 {
+  if (a_eRole == ROLE_ACCEPTED)
+  {
+    if (!BeginAcceptedSocket(a_tSock, a_oIp, a_usPort))
+    {
+      return false;
+    }
+    return StartRecvForSocket(a_tSock);
+  }
   auto l_oCtx          = std::make_shared<T_SOCKET_CTX>();
   l_oCtx->m_tSock      = a_tSock;
   l_oCtx->m_eRole      = a_eRole;
@@ -327,8 +403,9 @@ bool CSocketPool::_RegisterContext(socket_t           a_tSock,
                               m_hIocp,
                               reinterpret_cast<ULONG_PTR>(l_oCtx.get()),
                               0))
+  {
     return false;
-
+  }
   {
     std::lock_guard<std::mutex> l_oLk(m_oCtxMtx);
     m_oCtxMap[a_tSock] = l_oCtx;
@@ -425,13 +502,10 @@ socket_t CSocketPool::_CreateListenSocket(const std::string& a_oIp,
                                           uint16_t           a_usPort,
                                           int                a_iBacklog)
 {
-  bool l_bForceIpv4 = (a_oIp == "0.0.0.0" ||
-                       (!a_oIp.empty() &&
-                        a_oIp.find(':') == std::string::npos &&
-                        a_oIp != "::"));
+  bool l_bForceIpv4 = (a_oIp == "0.0.0.0" || (!a_oIp.empty() && a_oIp.find(':') == std::string::npos && a_oIp != "::"));
   int  l_iFamily    = l_bForceIpv4 ? AF_INET : AF_INET6;
 
-  socket_t l_tSock = ::socket(l_iFamily, SOCK_STREAM, IPPROTO_TCP);
+  socket_t l_tSock  = ::socket(l_iFamily, SOCK_STREAM, IPPROTO_TCP);
   if (l_tSock == D_INVALID_SOCK) return D_INVALID_SOCK;
 
   int l_iOn = 1;
@@ -522,14 +596,25 @@ void CSocketPool::_AcceptProc()
     _ResolvePeerAddr(l_tPeerAddr, l_oPeerIp, l_usPeerPort);
     _ApplySocketOptions(l_tClient);
 
-    if (!_RegisterContext(l_tClient, ROLE_ACCEPTED, l_oPeerIp, l_usPeerPort))
+    // IOCP 등록 후 Accept 콜백에서 TLS 핸드셰이크(동기)를 마친 뒤 WSARecv 시작
+    if (!BeginAcceptedSocket(l_tClient, l_oPeerIp, l_usPeerPort))
     {
       sfCloseRaw(l_tClient);
       continue;
     }
-
     if (m_cbfOnAccept_)
-      m_cbfOnAccept_(l_tClient, l_oPeerIp, l_usPeerPort);
+    {
+      if (!m_cbfOnAccept_(l_tClient, l_oPeerIp, l_usPeerPort))
+      {
+        _CloseSocket(l_tClient, false);
+        continue;
+      }
+    }
+    if (!StartRecvForSocket(l_tClient))
+    {
+      _CloseSocket(l_tClient, false);
+      continue;
+    }
   }
 }
 
@@ -643,6 +728,18 @@ void CSocketPool::_WorkerIOCP()
       if (m_cbfOnRecv_)
         m_cbfOnRecv_(l_pCtx->m_tSock, l_pOp->m_ucBuf, l_dwBytes);
 
+      // 콜백에서 Disconnect()를 호출하면 컨텍스트가 파괴된 뒤 _PostRecv가
+      // 실행되어 프로세스가 비정상 종료될 수 있으므로, RequestClose()만 허용한다.
+      if (!l_pCtx->m_bAlive.load())
+      {
+        continue;
+      }
+      if (l_pCtx->m_bClosePending.load())
+      {
+        _CloseSocket(l_pCtx->m_tSock, true);
+        continue;
+      }
+
       // _PostRecv 실패 -> 소켓 오류로 간주하고 종료
       if (!_PostRecv(*l_pCtx))
       {
@@ -742,3 +839,4 @@ void CSocketPool::_WorkerEpoll()
 }
 
 #endif  // _WIN32
+// -----------------------------------------------------------------------------

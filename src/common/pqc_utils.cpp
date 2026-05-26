@@ -22,7 +22,7 @@ bool gfLoadProvider4OQS(OSSL_LIB_CTX* a_pCtx)
   OSSL_PROVIDER* l_pProvider = OSSL_PROVIDER_load(a_pCtx, "oqsprovider");
   if (l_pProvider == NULL)
   {
-    fprintf(stderr, "[ERR_] oqsprovider 로드 실패\n");
+    printf("[ERR_] oqsprovider 로드 실패\n");
     ERR_print_errors_fp(stderr);
     return false;
   }
@@ -34,14 +34,14 @@ void gfPrintInfo4SSL(SSL* a_pSsl)
 {
   const SSL_CIPHER* l_pCipher = SSL_get_current_cipher(a_pSsl);
   const char* l_cpszCipherName = (l_pCipher != NULL) ? SSL_CIPHER_get_name(l_pCipher) : "N/A";
-  printf("Cipher Suite : %s\n", l_cpszCipherName);
+  printf("[INFO] Cipher Suite : %s\n", l_cpszCipherName);
 
   // 하이브리드(X25519MLKEM768 등)는 협상 NID가 OBJ에 등록되지 않아 nid2sn이 NULL인 경우가 많다.
   // OpenSSL이 세션에 보관한 TLS 그룹 문자열을 우선 사용하고, 없을 때만 NID→이름으로 폴백한다.
   const char* l_cpszTlsGroupName = SSL_get0_group_name(a_pSsl);
   if ((l_cpszTlsGroupName != NULL) && (l_cpszTlsGroupName[0] != '\0'))
   {
-    printf("KEM Group    : %s\n", l_cpszTlsGroupName);
+    printf("[INFO] KEM Group    : %s\n", l_cpszTlsGroupName);
   }
   else
   {
@@ -53,11 +53,11 @@ void gfPrintInfo4SSL(SSL* a_pSsl)
       {
         l_cpszGroupName = OBJ_nid2ln(l_iNid);
       }
-      printf("KEM Group    : %s\n", l_cpszGroupName ? l_cpszGroupName : "unknown");
+      printf("[INFO] KEM Group    : %s\n", l_cpszGroupName ? l_cpszGroupName : "unknown");
     }
     else
     {
-      printf("KEM Group    : (협상 없음)\n");
+      printf("[INFO] KEM Group    : (협상 없음)\n");
     }
   }
 
@@ -69,13 +69,14 @@ void gfPrintInfo4SSL(SSL* a_pSsl)
     {
       char l_cBuffer[512] = { 0 };
       X509_NAME_oneline(l_pSubject, l_cBuffer, static_cast<int>(sizeof(l_cBuffer)));
-      printf("Peer Subject : %s\n", l_cBuffer);
+      printf("[INFO] Peer Subject : %s\n", l_cBuffer);
     }
     X509_free(l_pPeerCert);
   }
   else
   {
-    printf("Peer Subject : N/A\n");
+    printf("[INFO] Peer Subject : N/A\n");
   }
-  printf("\n");
+//printf("\n");
 }
+// -----------------------------------------------------------------------------

@@ -12,8 +12,8 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 #include <stdlib.h>
 #include <string>
 #include <winsock2.h>
-// [JKC:20260428-1034] OPENSSL_Applink 문제 해결 (DLL 방식 OpenSSL 사용시에만 필요)
-// Notes: 반드시 다른 OpenSSL 헤더보다 우선하여 include
+// [JKC:20260428-1034] OPENSSL_Applink 문제 해결 (DLL 방식 OpenSSL 사용 시 필요)
+// Notes: 반드시 다른 OpenSSL 헤더보다 앞쪽에 include
 #include <openssl/applink.c>
 
 #include <openssl/err.h>
@@ -29,13 +29,13 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 [18081] PQC(TLS) HTTPS 대시보드 서버
 -+----------------------------------------------------------------------------+-
 - 목적
-  jk-https-server 공유메모리 통계를 브라우저에서 확인할 수 있는 대시보드 서버를 제공한다.
+  jk-https-server 공유메모리 통계를 브라우저에서 시각화 할 수 있는 대시보드 서버를 제공한다.
 - 구현
-  TLS(브라우저 접속) + 공유메모리 Consumer + /dashboard 렌더링을 수행한다.
+  TLS(브라우저 연결) + 공유메모리 Consumer + /dashboard 렌더링을 수행한다.
 -+----------------------------------------------------------------------------*/
 int main(int a_iArgc, char** a_ppszArgv)
 {
-  // 콘솔창 인코딩 UTF8 적용
+  // 콘솔의 인코딩 UTF8 설정
   SetConsoleOutputCP(CP_UTF8);
   SetConsoleCP(CP_UTF8);
 
@@ -46,7 +46,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   WSADATA l_tWsaData = { 0 };
   if (WSAStartup(MAKEWORD(2, 2), &l_tWsaData) != 0)
   {
-    fprintf(stderr, "[ERR_] WSAStartup 실패\n");
+    printf("[ERR_] WSAStartup 실패\n");
     return 1;
   }
 
@@ -57,12 +57,12 @@ int main(int a_iArgc, char** a_ppszArgv)
   }
 
   CShmStatsConsumer l_oConsumer;
-  (void)l_oConsumer.Init(); // 서버 미실행 상태를 허용하므로 실패해도 진행한다.
+  (void)l_oConsumer.Init(); // 서버 미실행 상태도 허용하므로 실패해도 진행한다.
 
   httplib::SSLServer l_oServer(l_strCertPath.c_str(), l_strKeyPath.c_str());
   if (!l_oServer.is_valid())
   {
-    fprintf(stderr, "[ERR_] httplib::SSLServer 초기화 실패\n");
+    printf("[ERR_] httplib::SSLServer 초기화 실패\n");
     ERR_print_errors_fp(stderr);
     l_oConsumer.Shutdown();
     WSACleanup();
@@ -72,7 +72,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   SSL_CTX* l_pSslCtx = static_cast<SSL_CTX*>(l_oServer.tls_context());
   if (l_pSslCtx == NULL)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX 획득 실패\n");
+    printf("[ERR_] SSL_CTX 획득 실패\n");
     l_oConsumer.Shutdown();
     WSACleanup();
     return 1;
@@ -82,7 +82,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   // [JKC:20260514-0710] Hybrid KEM 그룹 설정
   if (SSL_CTX_set1_groups_list(l_pSslCtx, "X25519MLKEM768:SecP256r1MLKEM768:X25519") != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패\n");
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패\n");
     ERR_print_errors_fp(stderr);
     l_oConsumer.Shutdown();
     WSACleanup();
@@ -112,8 +112,8 @@ int main(int a_iArgc, char** a_ppszArgv)
       "<div class='card'><div class='k'>현재 접속자 수</div><div id='current_connections' class='v'>0</div></div>"
       "<div class='card'><div class='k'>최대 동시 접속자 수</div><div id='max_connections' class='v'>0</div></div>"
       "<div class='card'><div class='k'>수신 데이터 총량</div><div id='total_rx_bytes' class='v'>0 KB</div></div>"
-      "<div class='card'><div class='k'>전송 데이터 총량</div><div id='total_tx_bytes' class='v'>0 KB</div></div>"
-      "<div class='card'><div class='k'>총 요청 처리 수</div><div id='total_requests' class='v'>0</div></div>"
+      "<div class='card'><div class='k'>송신 데이터 총량</div><div id='total_tx_bytes' class='v'>0 KB</div></div>"
+      "<div class='card'><div class='k'>총 처리 요청 수</div><div id='total_requests' class='v'>0</div></div>"
       "<div class='card'><div class='k'>서버 가동 시간</div><div id='uptime_seconds' class='v'>00:00:00</div></div>"
       "<div class='card'><div class='k'>마지막 갱신 시각</div><div id='last_updated' class='v'>N/A</div></div>"
       "</div></div><script>"
@@ -165,10 +165,10 @@ int main(int a_iArgc, char** a_ppszArgv)
     a_rRes.set_content(l_oJson.dump(), "application/json; charset=utf-8");
   });
 
-  printf("대시보드 서버 대기 중: https://0.0.0.0:%d\n", l_iServerPort);
+  printf("[INFO] 대시보드 서버 대기 중: https://0.0.0.0:%d\n", l_iServerPort);
   if (!l_oServer.listen("0.0.0.0", l_iServerPort))
   {
-    fprintf(stderr, "[ERR_] HTTPS 대시보드 서버 listen 실패\n");
+    printf("[ERR_] HTTPS 대시보드 서버 listen 실패\n");
     ERR_print_errors_fp(stderr);
     l_oConsumer.Shutdown();
     WSACleanup();

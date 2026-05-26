@@ -1,7 +1,7 @@
-prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp
-exec_prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/bin
-libdir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/lib
-includedir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/libllhttp/include
+prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/Debug/libllhttp
+exec_prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/Debug/libllhttp/bin
+libdir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/Debug/libllhttp/lib
+includedir=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/Debug/libllhttp/include
 
 Name: libllhttp
 Description: Node.js llhttp Library

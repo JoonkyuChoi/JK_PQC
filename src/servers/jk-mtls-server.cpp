@@ -27,6 +27,7 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 
 #include "pqc_utils.h"
 
+// Winsock 2.2 초기화 (0=성공, 그 외 WSAStartup 오류 코드)
 static int sfInitWinsock()
 {
   WSADATA l_tWsaData = { 0 };
@@ -51,7 +52,7 @@ int main(int a_iArgc, char** a_ppszArgv)
     {
       if ((l_i + 1) >= a_iArgc)
       {
-        fprintf(stderr, "[ERR_] --kem 옵션에 값이 필요합니다.\n");
+        printf("[ERR_] --kem 옵션에 값이 필요합니다.\n");
         return 1;
       }
       l_strKemOpt = a_ppszArgv[++l_i];
@@ -116,13 +117,13 @@ int main(int a_iArgc, char** a_ppszArgv)
     ERR_print_errors_fp(stderr);
     goto FINALIZE;
   }
-  printf("KEM Groups  : %s\n", l_strKemGroups.c_str());
+  printf("[INFO] KEM Groups  : %s\n", l_strKemGroups.c_str());
   // -----------------
   // Hybrid KEM 그룹 설정 (클라이언트와 동일한 그룹 사용)
   // -----------------
   if (SSL_CTX_set1_groups_list(l_pSslCtx, l_strKemGroups.c_str()) != 1)
   {
-    fprintf(stderr, "[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", l_strKemGroups.c_str());
+    printf("[ERR_] SSL_CTX_set1_groups_list 실패: %s\n", l_strKemGroups.c_str());
     ERR_print_errors_fp(stderr);
     goto FINALIZE;
   }
@@ -131,14 +132,14 @@ int main(int a_iArgc, char** a_ppszArgv)
   // -------------------------------------
   if (sfInitWinsock() != 0)
   {
-    fprintf(stderr, "[ERR_] WSAStartup 실패\n");
+    printf("[ERR_] WSAStartup 실패\n");
     goto FINALIZE;
   }
   // 서버 소켓 생성
   l_hListenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (l_hListenSock == INVALID_SOCKET)
   {
-    fprintf(stderr, "[ERR_] socket 생성 실패\n");
+    printf("[ERR_] socket 생성 실패\n");
     goto FINALIZE;
   }
   // 바인딩을 위해, 주소 구조체 설정
@@ -150,16 +151,16 @@ int main(int a_iArgc, char** a_ppszArgv)
   // -------------------------------------
   if (bind(l_hListenSock, reinterpret_cast<sockaddr*>(&l_tAddr), sizeof(l_tAddr)) == SOCKET_ERROR)
   {
-    fprintf(stderr, "[ERR_] bind 실패\n");
+    printf("[ERR_] bind 실패\n");
     goto FINALIZE;
   }
   if (listen(l_hListenSock, SOMAXCONN) == SOCKET_ERROR)
   {
-    fprintf(stderr, "[ERR_] listen 실패\n");
+    printf("[ERR_] listen 실패\n");
     goto FINALIZE;
   }
 
-  printf("서버 대기 중: 0.0.0.0:%s (Ctrl+C 로 종료)\n", l_cpszServerPort);
+  printf("[INFO] 서버 대기 중: 0.0.0.0:%s (Ctrl+C 로 종료)\n", l_cpszServerPort);
   // -------------------------------------
   // 연속 접속 처리: accept 루프
   // -------------------------------------
@@ -168,7 +169,7 @@ int main(int a_iArgc, char** a_ppszArgv)
     SOCKET l_hClientSock = accept(l_hListenSock, NULL, NULL);
     if (l_hClientSock == INVALID_SOCKET)
     {
-      fprintf(stderr, "[ERR_] accept 실패, 다음 대기로 계속합니다.\n");
+      printf("[ERR_] accept 실패, 다음 대기로 계속합니다.\n");
       continue;
     }
     SSL* l_pSsl = SSL_new(l_pSslCtx);

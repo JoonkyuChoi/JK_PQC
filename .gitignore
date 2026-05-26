@@ -7,6 +7,9 @@ pre-certs/
 *.dll
 *.pdb
 *.bkp
+*.log
+server-err.txt
+server-out.txt
 
 # Generated folders
 bin/

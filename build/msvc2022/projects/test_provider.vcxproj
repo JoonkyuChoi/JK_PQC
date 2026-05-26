@@ -97,7 +97,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>Default</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>

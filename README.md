@@ -35,6 +35,7 @@
   - [인증서 체계 구축](#인증서-체계-구축)
   - [솔루션 빌드](#솔루션-빌드)
   - [`jk-https-server` 콘솔 옵션](#jk-https-server-콘솔-옵션)
+  - [`jk-pqc-server` 콘솔 옵션](#jk-pqc-server-콘솔-옵션)
   - [주요 폴더/파일 설명](#주요-폴더파일-설명)
   - [실행 절차](#실행-절차)
   - [결과 로그](#결과-로그)
@@ -43,7 +44,13 @@
 ---
 
 ## 개발 이력
-- [2026.05.23 ~           ] 고성능 PQC 서버(jk-pqc-server) 설계/개발 시작
+- [2026.05.23 ~ 2026.05.26] 고성능 PQC 서버(jk-pqc-server) 개발
+  ```markdown
+  * `IOCP/EPOLL + LLHTTP`를 적용한 고성능 PQC 서버(jk-pqc-server) 개발
+  * 종속 라이브러리들을 포함한 모든 프로젝트를 `/MD` 모드로 재빌드
+    `KONG, APISIX` 게이트웨이들에 PQC를 적용시키기 위해. `/MD` 모드로 빌드된 결과물 필요
+  * `jk-pqc-server`의 구성 정보를 `config.json` 파일에서 로드하도록 처리
+  ```
 - [2026.05.23 ~ 2026.05.23] cpp-httplib, liboqs, oqs-provider 설치 경로 변경 (include, bin > src/common, _deps)
   ```bash
   git rm -r "./include"
@@ -51,6 +58,13 @@
   ```
 - [2026.05.18 ~ 2026.05.19] GitHub 등록
 - [2026.04.21 ~ 2026.05.16] Windows PQC mTLS 인증 시스템 구축
+  ```markdown
+  * jk-mtls-server
+  * jk-mtls-client
+  * jk-https-server
+  * jk-https-client
+  * jk-https-dashboard
+  ```
 
 ---
 
@@ -96,21 +110,33 @@ mTLS의 경우, 양방향 상호 TLS 인증을 의미하며, 여기에 PQC를 �
 | --------------- | --------------- |
 | jk-mtls-server  | jk-mtls-client  |
 | jk-https-server | jk-https-client |
+| jk-pqc-server   | jk-https-client |
 
 ### 구현 어플들
 - `jk-mtls-server`, `jk-mtls-client` 어플들은 HTTPS를 구현하기 전에, TCP 통신용으로 구현해 본 것입니다.  
   사전 데모 용도라서, 많은 기능들이 누락되었으니, 참고용으로만 사용하세요.
-- `jk-https-server`, `jk-https-client` 어플들이 HTTPS로 `Hybrid mTLS` 인증을 구현한 것입니다.
+- `jk-https-server`, `jk-https-client` 어플들은 HTTPS로 `Hybrid mTLS` 인증을 구현한 것입니다.
+  - 동기 방식이며, Blocking 소켓을 사용하고, 소켓당 쓰레드 1개가 담당합니다.
+  - 동기 방식 서버는 학습, 실험용으로 실용 가치가 떨어집니다.
+- `jk-pqc-server` 어플은 실용적인 `IOCP/epoll`을 적용한 고성능 HTTPS로 `Hybrid mTLS` 인증을 구현한 것입니다.
+  - 비동기 방식이며, NonBlocking 소켓을 사용하고, 설정한 수량의 쓰레드들이 소켓풀에 스캐줄링된 소켓들을 담당합니다.
+  - `jk-pqc-mtls-org.dll`은 `Hybrid mTLS` 인증을 모듈화한 `일반적인 동적 라이브러리` 입니다.
+  - `jk-pqc-mtls-lua.dll`은 `Hybrid mTLS` 인증을 모듈화한 `LuaJIT 가능 동적 라이브러리` 입니다.
 - `jk-https-dashboard`는 일반 TLS로 구현된 (실시간 접속정보 감시용) 대시보드 API서버입니다.
 
 ### 브라우저 접속 화면들
-`Hybrid mTLS` 서버(jk-https-server)에 브라우저로 접속하려면, `--single-cert` 옵션을 제외시킨 `이중 인증서`모드로 서버를 구동시킨 경우에 가능합니다.
+`Hybrid mTLS (HTTPS)` 서버(jk-https-server, jk-pqc-server)에 브라우저로 접속하려면, `--single-cert` 옵션을 제외시킨 `이중 인증서`모드로, 서버를 구동시킨 경우에 가능합니다.  
+2가지 서버의 리슨 포트는 기본값으로 `18080`을 사용합니다.  
+둘 중에 하나만 구동하거나, `jk-pqc-server`는 콘솔옵션으로 포트를 변경할 수 있습니다.
 
 아래의 이미지는 `Hybrid mTLS` 서버에, 브라우저(https://localhost:18080/)로 접속 시, `클라이언트 인증서 선택창`의 출력 화면입니다.  
 ![JK-PQC-Browser-ECDSA mTLS 인증서 선택창](./docs/images/JK-PQC-18080-mTLS.png)
 
-아래의 이미지는 `Hybrid mTLS` 서버에, 브라우저(https://localhost:18080/)로 접속 시, `인증 완료`된 응답의 출력 화면입니다.  
-![JK-PQC-Browser-ECDSA mTLS 인증 완료](./docs/images/JK-PQC-18080.png)
+아래의 이미지는 `Hybrid mTLS (jk-https-server) 서버에, 브라우저(https://localhost:18080/)로 접속 시, `인증 완료`된 응답의 출력 화면입니다.  
+![jk-https-server : JK-PQC-Browser-ECDSA mTLS 인증 완료](./docs/images/JK-PQC-18080.png)
+
+아래의 이미지는 `Hybrid mTLS (jk-pqc-server) 서버에, 브라우저(https://localhost:18080/)로 접속 시, `인증 완료`된 응답의 출력 화면입니다.  
+![jk-pqc-server : JK-PQC-Browser-ECDSA mTLS 인증 완료](./docs/images/JK-PQC-NEW-18080.png)
 
 아래의 이미지는 `일반 TLS` 대시보드 서버에, 브라우저(https://localhost:18081/)로 접속 시, 실시간 응답 화면입니다.  
 ![JK-PQC-Browser-ECDSA 대시보드](./docs/images/JK-PQC-18081.png)
@@ -150,11 +176,13 @@ mTLS의 경우, 양방향 상호 TLS 인증을 의미하며, 여기에 PQC를 �
 - `mTLS + PQC + TCP` 인증
   * jk-mtls-server
   * jk-mtls-client
-- `mTLS + PQC + HTTPS` 인증
+- `mTLS + PQC + HTTPS` 인증 (Blocking 소켓을 사용한 동기 방식)
   * jk-https-server
   * jk-https-client
+- `mTLS + PQC + HTTPS` 인증 (`IOCP/epoll`을 적용한 비동기 방식)
+  * jk-pqc-server
 - `실시간 통계` 서비스
-  * jk-https-dashboard : `jk-https-server`의 대시보드 API 서버
+  * jk-https-dashboard : `Hybrid mTLS (HTTPS)`서버들의 대시보드(실시간 통계) API 서버
 
 ### 인증서 체계 구축
 [상세 보기](./docs/Making-Certs.md#인증서-체계-구축)
@@ -181,6 +209,22 @@ $ MSBuild.exe JK-PQC\build\msvc2022\JK-PQC.sln /p:Configuration=Debug /p:Platfor
 --help          도움말 출력
 ```
 
+### `jk-pqc-server` 콘솔 옵션
+```
+-f <file>       구성정보 파일 경로 (기본값: ./config.json)
+-b <ip>         바인딩 IP (:: = IPv6 듀얼스택, 0.0.0.0 = IPv4전용)
+-p <port>       리스닝 포트 (기본값: 18080)
+-c <file>       서버 인증서 파일 (.pem)
+-k <file>       서버 개인키 파일 (.pem)
+-a <file>       CA 인증서 파일 (.pem) - mTLS 클라이언트 검증용 (ML-DSA)
+-w <count>      워커 쓰레드 수 (기본값: 4)
+-t <sec>        무통신 타임아웃 (초, 0=비활성화)
+--kem <groups>  사용할 KEM 그룹 목록 (예: X25519MLKEM768:SecP256r1MLKEM768:X25519)
+--single-cert   ML-DSA 인증서만 사용 (이중 인증서 비활성화)
+--no-mtls       일반 TLS 동작 (클라이언트 인증서 불필요)
+--help          사용법 출력
+```
+
 ### 주요 폴더/파일 설명
 ```
 JK-PQC/
@@ -191,13 +235,15 @@ JK-PQC/
   │       │   ├── jk-https-client.exe        # jk-https-client.vcxproj    프로젝트의 Debug모드 빌드 결과물
   │       │   ├── jk-https-server.exe        # jk-https-server.vcxproj    프로젝트의 Debug모드 빌드 결과물
   │       │   ├── jk-mtls-client.exe         # jk-mtls-client.vcxproj     프로젝트의 Debug모드 빌드 결과물
-  │       │   └── jk-mtls-server.exe         # jk-mtls-server.vcxproj     프로젝트의 Debug모드 빌드 결과물
+  │       │   ├── jk-mtls-server.exe         # jk-mtls-server.vcxproj     프로젝트의 Debug모드 빌드 결과물
+  │       │   └── jk-pqc-server.exe          # jk-pqc-server.vcxproj      프로젝트의 Debug모드 빌드 결과물
   │       └── Release/
   │            ├── jk-https-dashboard.exe     # jk-https-dashboard.vcxproj 프로젝트의 Release모드 빌드 결과물
   │            ├── jk-https-client.exe        # jk-https-client.vcxproj    프로젝트의 Release모드 빌드 결과물
   │            ├── jk-https-server.exe        # jk-https-server.vcxproj    프로젝트의 Release모드 빌드 결과물
   │            ├── jk-mtls-client.exe         # jk-mtls-client.vcxproj     프로젝트의 Release모드 빌드 결과물
-  │            └── jk-mtls-server.exe         # jk-mtls-server.vcxproj     프로젝트의 Release모드 빌드 결과물
+  │            ├── jk-mtls-server.exe         # jk-mtls-server.vcxproj     프로젝트의 Release모드 빌드 결과물
+  │            └── jk-pqc-server.exe          # jk-pqc-server.vcxproj      프로젝트의 Release모드 빌드 결과물
   ├── build/
   │   └── msvc2022/
   │       ├── JK-PQC.sln                      # MSVC2022 솔루션 파일
@@ -205,10 +251,12 @@ JK-PQC/
   │           ├── jk-https-dashboard.vcxproj  # "mTLS + PQC + HTTPS" 대시보드 서버 콘솔앱 MSVC 프로젝트
   │           │                                 #   → [ECDSA P-256] 파일맵 공유 메모리의 실시간 트래픽 데이터를 브라우저에 서비스
   │           ├── jk-https-client.vcxproj     # "mTLS + PQC + HTTPS" 인증 클라이언트 콘솔앱 MSVC 프로젝트
-  │           ├── jk-https-server.vcxproj     # "mTLS + PQC + HTTPS" 인증 서버 콘솔앱 MSVC 프로젝트
+  │           ├── jk-https-server.vcxproj     # "mTLS + PQC + HTTPS" 인증 서버 콘솔앱 MSVC 프로젝트 (Blocking 소켓 동기 방식)
   │           │                                 #   → [ML-DSA-65] 실시간 트래픽 데이터를 파일맵 공유 메모리에 저장
   │           ├── jk-mtls-client.vcxproj      # "mTLS + PQC + TCP" 인증 클라이언트 콘솔앱 MSVC 프로젝트
-  │           └── jk-mtls-server.vcxproj      # "mTLS + PQC + TCP" 인증 서버 콘솔앱 MSVC 프로젝트
+  │           ├── jk-mtls-server.vcxproj      # "mTLS + PQC + TCP" 인증 서버 콘솔앱 MSVC 프로젝트
+  │           └── jk-pqc-server.vcxproj       # "mTLS + PQC + HTTPS" 인증 서버 콘솔앱 MSVC 프로젝트 (IOCP/epoll 비동기 방식)
+  │                                              #   → [ML-DSA-65] 실시간 트래픽 데이터를 파일맵 공유 메모리에 저장
   ├── certs/                            # 인증서 루트 폴더
   │   ├── ecdsa/                       # [ECDSA] 인증서 루트
   │   │   ├── ca/                     # [ECDSA] 루트 CA
@@ -220,7 +268,7 @@ JK-PQC/
   │   │   │   ├── client-cert.pem    # 브라우저용 클라이언트 인증서 (공개)
   │   │   │   ├── client-key.pem     # 브라우저용 클라이언트 개인키 (절대 유출 금지)
   │   │   │   └── client.csr         # 브라우저용 클라이언트 인증서 서명 요청 (임시)
-  │   │   └── server/                 # jk-https-server 전용
+  │   │   └── server/                 # jk-https-server, jk-pqc-server 전용
   │   │        ├── server-cert.pem    # 서버 인증서 (공개) — PQC 미지원 클라이언트 제공용
   │   │        ├── server-cert.srl    # 서버 인증서 서명 일련번호 (자동 관리)
   │   │        └── server-key.pem     # 서버 개인키 (절대 유출 금지)
@@ -254,7 +302,7 @@ JK-PQC/
   │   │   ├── dashboard-key.pem       # 대시보드 서버 개인키 (ECDSA P-256, 외부 노출 금지)
   │   │   └── dashboard.csr           # 대시보드 서버 인증서 서명 요청서 (CA 서명 후 보관용)
   │   │
-  │   └── server/                      # [MLDSA] jk-mtls-server / jk-https-server 공용
+  │   └── server/                      # [MLDSA] PQC 서버 공용 (jk-mtls-server / jk-https-server /jk-pqc-server)
   │       ├── server-cert.pem          # 서버 인증서 (CA 서명, EKU=serverAuth, 유효기간 1년)
   │       │                              #   → SAN: DNS:localhost, IP:127.0.0.1 포함
   │       │                              #   → mTLS 핸드셰이크 시, 클라이언트에 제출하여 신원 증명
@@ -271,12 +319,15 @@ JK-PQC/
       │   ├── https.cpp                # "mTLS + PQC + HTTPS" 통신 클래스(CHttpsBase/CHttpsServer/CHttpsClient) 구현
       │   ├── pqc_utils.h              # PQC 초기화, oqs-provider 로드 등 공통 유틸 정의
       │   ├── pqc_utils.cpp            # PQC 초기화, oqs-provider 로드 등 공통 유틸 구현
-      │   ├── shm_stats.h              # "jk-https-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 정의
-      │   └── shm_stats.cpp            # "jk-https-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 구현
+      │   ├── shm_stats.h              # "jk-https-server, jk-pqc-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 정의
+      │   └── shm_stats.cpp            # "jk-https-server, jk-pqc-server 실시간 통계정보" 공유메모리 클래스(CShmStatsProducer) 구현
       ├── servers/                      # 서버 어플 관련 소스코드 폴더
-      │   ├── jk-https-server.cpp      # "mTLS + PQC + HTTPS" 인증 서버 시작 파일
+      │   ├── jk-https-server.cpp      # "mTLS + PQC + HTTPS" 인증 서버 시작 파일 (Blocking 소켓 동기 방식)
       │   ├── jk-mtls-server.cpp       # "mTLS + PQC + TCP" 인증 서버 시작 파일
-      │   ├── jk-https-dashboard.cpp   # "mTLS + PQC + HTTPS" 대시보드 서버 시작 파일
+      │   ├── jk-https-dashboard.cpp   # "고전 TLS (HTTPS)" 대시보드 서버 시작 파일
+      │   ├── jk-pqc-server.cpp        # "mTLS + PQC + HTTPS" 인증 서버 시작 파일 (IOCP/epoll 비동기 방식)
+      │   ├── jk-pqc-server-routes.cpp # `jk-pqc-server`의 라우팅 함수들 구현
+      │   ├── jk-pqc-server.h          # `jk-pqc-server`의 라우팅 함수들 정의
       │   ├── shm_consumer.h           # "jk-https-dashboard 공유메모리 통계" 리더 클래스(CShmStatsConsumer) 정의
       │   └── shm_consumer.cpp         # "jk-https-dashboard 공유메모리 통계" 리더 클래스(CShmStatsConsumer) 구현
       └── tests/                        # 테스트 어플 관련 소스코드 폴더
@@ -291,8 +342,14 @@ $ cd D:\E\Study\AI\AutoAgents\projects\JK-PQC
 $ bin\msvc\Debug\jk-mtls-server
 $ bin\msvc\Debug\jk-mtls-client
 
-# "mTLS + PQC + HTTPS" 인증 테스트 (18080)
+# "mTLS + PQC + HTTPS + Sync(blocking)" 인증 테스트 (18080)
 $ bin\msvc\Debug\jk-https-server
+$ bin\msvc\Debug\jk-https-client
+$ bin\msvc\Debug\jk-https-client --kem SecP256r1MLKEM768
+$ bin\msvc\Debug\jk-https-client --kem X25519
+
+# "mTLS + PQC + HTTPS + Async(nonblocking)" 인증 테스트 (18080)
+$ bin\msvc\Debug\jk-pqc-server
 $ bin\msvc\Debug\jk-https-client
 $ bin\msvc\Debug\jk-https-client --kem SecP256r1MLKEM768
 $ bin\msvc\Debug\jk-https-client --kem X25519
@@ -306,7 +363,7 @@ $ bin\msvc\Debug\jk-https-dashboard
 ```
 
 ### OpenSSL 클라이언트로 테스트
-`jk-https-server` 구동된 상태에서, 아래의 명령들을 수행한다.
+`jk-https-server`, `jk-pqc-server` 구동된 상태에서, 아래의 명령들을 수행한다.
 ```bash
 # Hybrid KEM 테스트
 $ openssl s_client -connect localhost:18080 -groups X25519MLKEM768 -cert certs\client\client-cert.pem -key certs\client\client-key.pem -CAfile certs\ca\ca-cert.pem -provider oqsprovider -provider default

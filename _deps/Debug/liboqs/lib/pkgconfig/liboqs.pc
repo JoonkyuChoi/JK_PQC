@@ -1,4 +1,4 @@
-prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/liboqs
+prefix=D:/E/Study/AI/AutoAgents/projects/JK-PQC/_deps/Debug/liboqs
 libdir=${prefix}/lib
 includedir=${prefix}/include
 

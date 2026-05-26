@@ -2,7 +2,7 @@
 
 본 문서는 [개인 블로그 사이트](https://blog.jk-dreams.com/) 게시용 정보를 보관한 것이다.
 
-![대표 이미지](JK-PQC-18080.png)
+![대표 이미지](JK-PQC-NEW-18080.png)
 
 ## Title
 JK-PQC
@@ -17,8 +17,27 @@ portfolio
 ## 개발 정보
 ```
 - 개발 이력
-  [2026.05.18 ~ 2026.05.19] 공개용 편집 및 GitHub 등록
-  [2025.04.21 ~ 2026.05.16] Windows PQC mTLS 인증 시스템 구축
+  [2026.05.23 ~ 2026.05.26] 고성능 PQC 서버(jk-pqc-server) 개발
+    ```markdown
+    * `IOCP/EPOLL + LLHTTP`를 적용한 고성능 PQC 서버(jk-pqc-server) 개발
+    * 종속 라이브러리들을 포함한 모든 프로젝트를 `/MD` 모드로 재빌드
+      `KONG, APISIX` 게이트웨이들에 PQC를 적용시키기 위해. `/MD` 모드로 빌드된 결과물 필요
+    * `jk-pqc-server`의 구성 정보를 `config.json` 파일에서 로드하도록 처리
+    ```
+  [2026.05.23 ~ 2026.05.23] cpp-httplib, liboqs, oqs-provider 설치 경로 변경 (include, bin > src/common, _deps)
+    ```bash
+    git rm -r "./include"
+    git rm -r "./bin"
+    ```
+  [2026.05.18 ~ 2026.05.19] GitHub 등록
+  [2026.04.21 ~ 2026.05.16] Windows PQC mTLS 인증 시스템 구축
+    ```markdown
+    * jk-mtls-server
+    * jk-mtls-client
+    * jk-https-server
+    * jk-https-client
+    * jk-https-dashboard
+    ```
 - 개발 환경 및 툴
   Cursor, MSVC2022, Perl, nasm, CMake
 - 개발 언어
@@ -28,6 +47,7 @@ portfolio
   > liboqs (0.13.0) : https://github.com/open-quantum-safe/liboqs/tree/0.13.0
   > oqs-provider (0.9.0) : https://github.com/open-quantum-safe/oqs-provider/tree/0.9.0
   > cpp-httplib (0.40.0) : https://github.com/ggml-org/llama.cpp/tree/master/vendor/cpp-httplib
+  > llhttp (9.4.1) : https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.1.zip
 - 데이터 관리
   > File
 - 통신

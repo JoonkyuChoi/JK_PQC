@@ -17,7 +17,6 @@ Copyright		: 2026~ by Joonkyu Choi, All rights reserved.
 변경 이력   :
   [2026/05/21] 추초 작성
 -+----------------------------------------------------------------------------*/
-
 #include "SocketPool.h"
 #include <chrono>
 #include <cstdio>
@@ -74,7 +73,7 @@ static void sfPrintUsage(const char* a_pszProg)
 static void sfSignalHandler(int a_iSig)
 {
   (void)a_iSig;
-  printf("\n[!] 종료 신호 수신...\n");
+  printf("\n[INFO] 종료 신호 수신...\n");
   g_bStop = true;
 }
 
@@ -85,11 +84,13 @@ static void sfSignalHandler(int a_iSig)
 // -----------------------------------------------------------------------------
 // cbfServerAccept : 클라이언트 접속 수락
 // -----------------------------------------------------------------------------
-static void cbfServerAccept(socket_t        a_tSock,
+static bool cbfServerAccept(socket_t        a_tSock,
                             const std::string& a_oIp,
                             uint16_t           a_usPort)
 {
-  printf("[S][+] Accept  fd=%-5d  %s:%u\n", (int)a_tSock, a_oIp.c_str(), a_usPort);
+  printf("[INFO:RECV:TCP_:%05d] S Accept %s:%u\n",
+         static_cast<int>(a_tSock), a_oIp.c_str(), a_usPort);
+  return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +98,7 @@ static void cbfServerAccept(socket_t        a_tSock,
 // -----------------------------------------------------------------------------
 static void cbfServerDisconnect(socket_t a_tSock)
 {
-  printf("[S][-] Disconnect  fd=%-5d\n", (int)a_tSock);
+  printf("[INFO:SEND:TCP_:%05d] S Disconnect\n", static_cast<int>(a_tSock));
 }
 
 // -----------------------------------------------------------------------------
@@ -107,10 +108,10 @@ static void cbfServerRecv(socket_t        a_tSock,
                           const uint8_t*  a_pucData,
                           size_t          a_ullLen)
 {
-  printf("[S][R] fd=%-5d  len=%zu  data=%.*s\n",
-         (int)a_tSock,
+  printf("[DBG_:RECV:TCP_:%05d] S len=%zu data=%.*s\n",
+         static_cast<int>(a_tSock),
          a_ullLen,
-         (int)a_ullLen,
+         static_cast<int>(a_ullLen),
          reinterpret_cast<const char*>(a_pucData));
 
   // 에코: 수신한 데이터 원문을 그대로 반송
@@ -123,7 +124,7 @@ static void cbfServerRecv(socket_t        a_tSock,
 // -----------------------------------------------------------------------------
 static void cbfServerError(socket_t a_tSock, int a_iErr)
 {
-  printf("[S][E] fd=%-5d  err=%d\n", (int)a_tSock, a_iErr);
+  printf("[ERR_:RECV:TCP_:%05d] S Error err=%d\n", static_cast<int>(a_tSock), a_iErr);
 }
 
 // =============================================================================
@@ -135,7 +136,7 @@ static void cbfServerError(socket_t a_tSock, int a_iErr)
 // -----------------------------------------------------------------------------
 static void cbfClientConnect(socket_t a_tSock)
 {
-  printf("[C][+] Connected  fd=%-5d\n", (int)a_tSock);
+  printf("[INFO:RECV:TCP_:%05d] C Connected\n", static_cast<int>(a_tSock));
 }
 
 // -----------------------------------------------------------------------------
@@ -143,7 +144,7 @@ static void cbfClientConnect(socket_t a_tSock)
 // -----------------------------------------------------------------------------
 static void cbfClientDisconnect(socket_t a_tSock)
 {
-  printf("[C][-] Disconnected  fd=%-5d\n", (int)a_tSock);
+  printf("[INFO:SEND:TCP_:%05d] C Disconnected\n", static_cast<int>(a_tSock));
 }
 
 // -----------------------------------------------------------------------------
@@ -153,10 +154,10 @@ static void cbfClientRecv(socket_t        a_tSock,
                           const uint8_t*  a_pucData,
                           size_t          a_ullLen)
 {
-  printf("[C][R] fd=%-5d  len=%zu  echo=%.*s\n",
-         (int)a_tSock,
+  printf("[DBG_:RECV:TCP_:%05d] C len=%zu echo=%.*s\n",
+         static_cast<int>(a_tSock),
          a_ullLen,
-         (int)a_ullLen,
+         static_cast<int>(a_ullLen),
          reinterpret_cast<const char*>(a_pucData));
 }
 
@@ -165,7 +166,7 @@ static void cbfClientRecv(socket_t        a_tSock,
 // -----------------------------------------------------------------------------
 static void cbfClientError(socket_t a_tSock, int a_iErr)
 {
-  printf("[C][E] fd=%-5d  err=%d\n", (int)a_tSock, a_iErr);
+  printf("[ERR_:RECV:TCP_:%05d] C Error err=%d\n", static_cast<int>(a_tSock), a_iErr);
 }
 
 // =============================================================================
@@ -175,7 +176,7 @@ static int ufRunServer(const std::string& a_oBindIp,
                        uint16_t           a_usPort,
                        uint32_t           a_uiIdleSec)
 {
-  printf("[Server] 시작  bind=%s  port=%u  idle=%us\n", a_oBindIp.c_str(), a_usPort, a_uiIdleSec);
+  printf("[INFO] Server 시작  bind=%s  port=%u  idle=%us\n", a_oBindIp.c_str(), a_usPort, a_uiIdleSec);
 
   CSocketPool::T_CONFIG l_tCfg;
   l_tCfg.m_iWorkerThreads   = 4;
@@ -194,31 +195,31 @@ static int ufRunServer(const std::string& a_oBindIp,
 
   if (!l_oPool.Start())
   {
-    fprintf(stderr, "[Server] Start() 실패\n");
+    printf("[ERR_] Server Start() 실패\n");
     return 1;
   }
 
   if (!l_oPool.Listen(a_oBindIp, a_usPort))
   {
-    fprintf(stderr, "[Server] Listen() 실패  bind=%s port=%u\n", a_oBindIp.c_str(), a_usPort);
+    printf("[ERR_] Server Listen() 실패  bind=%s port=%u\n", a_oBindIp.c_str(), a_usPort);
     l_oPool.Stop();
     return 1;
   }
 
-  printf("[Server] 대기 중... (Ctrl+C 로 종료)\n\n");
+  printf("[INFO] Server 대기 중... (Ctrl+C 로 종료)\n\n");
 
   while (!g_bStop)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    static int l_iCnt = 0;
+    static int l_iCnt = 0;  // 접속 수 주기 출력용 루프 카운터 (10초마다)
     if (++l_iCnt % 20 == 0)   // 10초마다 접속 수 출력
-      printf("[Server] 현재 접속 수: %zu\n", l_oPool.GetConnectionCount());
+      printf("[INFO] Server 현재 접속 수: %zu\n", l_oPool.GetConnectionCount());
   }
 
   l_oPool.Stop();
   g_pPool = nullptr;
-  printf("[Server] 종료\n");
+  printf("[INFO] Server 종료\n");
   return 0;
 }
 
@@ -228,7 +229,7 @@ static int ufRunServer(const std::string& a_oBindIp,
 static int ufRunClient(const std::string& a_oHost,
                        uint16_t           a_usPort)
 {
-  printf("[Client] 접속  host=%s  port=%u\n",
+  printf("[INFO] Client 접속  host=%s  port=%u\n",
          a_oHost.c_str(), a_usPort);
 
   CSocketPool::T_CONFIG l_tCfg;
@@ -246,21 +247,21 @@ static int ufRunClient(const std::string& a_oHost,
 
   if (!l_oPool.Start())
   {
-    fprintf(stderr, "[Client] Start() 실패\n");
+    printf("[ERR_] Client Start() 실패\n");
     return 1;
   }
 
   socket_t l_tSock = l_oPool.Connect(a_oHost, a_usPort);
   if (l_tSock == D_INVALID_SOCK)
   {
-    fprintf(stderr, "[Client] Connect() 실패\n");
+    printf("[ERR_] Client Connect() 실패\n");
     l_oPool.Stop();
     return 1;
   }
 
   // 접속 포인트 에코 테스트
-  printf("[Client] 메시지를 송신합니다. 에코 응답을 확인하세요.\n");
-  printf("[Client] Ctrl+C 로 종료\n\n");
+  printf("[INFO] Client 메시지를 송신합니다. 에코 응답을 확인하세요.\n");
+  printf("[INFO] Client Ctrl+C 로 종료\n\n");
 
   int l_iSeq = 0;
   while (!g_bStop)
@@ -272,7 +273,7 @@ static int ufRunClient(const std::string& a_oHost,
                       reinterpret_cast<const uint8_t*>(l_szMsg),
                       strlen(l_szMsg)))
     {
-      printf("[Client] Send 실패 또는 접속 종료\n");
+      printf("[WARN] Client Send 실패 또는 접속 종료\n");
       break;
     }
 
@@ -282,7 +283,7 @@ static int ufRunClient(const std::string& a_oHost,
   l_oPool.Disconnect(l_tSock);
   l_oPool.Stop();
   g_pPool = nullptr;
-  printf("[Client] 종료\n");
+  printf("[INFO] Client 종료\n");
   return 0;
 }
 
@@ -329,7 +330,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   // ----------------------------------------
   if (l_usPort == 0)
   {
-    fprintf(stderr, "[!] -p 옵션이 필수입니다.\n");
+    printf("[ERR_] -p 옵션이 필수입니다.\n");
     sfPrintUsage(a_ppszArgv[0]);
     return 1;
   }
@@ -346,7 +347,7 @@ int main(int a_iArgc, char** a_ppszArgv)
   }
   else
   {
-    fprintf(stderr, "[!] -b (Server) 또는 -h (Client) 중 하나만 지정하세요.\n");
+    printf("[ERR_] -b (Server) 또는 -h (Client) 중 하나만 지정하세요.\n");
     sfPrintUsage(a_ppszArgv[0]);
     return 1;
   }

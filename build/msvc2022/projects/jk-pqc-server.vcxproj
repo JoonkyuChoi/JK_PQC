@@ -19,18 +19,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\common\https.cpp" />
     <ClCompile Include="..\..\..\src\common\pqc_utils.cpp" />
+    <ClCompile Include="..\..\..\src\common\pqchttps.cpp" />
     <ClCompile Include="..\..\..\src\common\shm_stats.cpp" />
+    <ClCompile Include="..\..\..\src\common\SocketPool.cpp" />
+    <ClCompile Include="..\..\..\src\servers\jk-pqc-server-routes.cpp" />
     <ClCompile Include="..\..\..\src\servers\jk-pqc-server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\common\https.h" />
+    <ClInclude Include="..\..\..\src\common\json.hpp" />
     <ClInclude Include="..\..\..\src\common\pqc_utils.h" />
+    <ClInclude Include="..\..\..\src\common\pqchttps.h" />
+    <ClInclude Include="..\..\..\src\common\root_page.h" />
     <ClInclude Include="..\..\..\src\common\shm_stats.h" />
+    <ClInclude Include="..\..\..\src\common\SocketPool.h" />
+    <ClInclude Include="..\..\..\src\servers\jk-pqc-server.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\config.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7CE2A267-C0F1-4F77-8C16-919E6115FBF1}</ProjectGuid>
+    <ProjectGuid>{33DD1F10-D3D9-484A-A2B9-889C870778A3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>JKTransformer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -124,7 +133,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CPPHTTPLIB_OPENSSL_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\_deps\$(Configuration)\liboqs\include;..\..\..\_deps\oqs-provider\include;..\..\..\_deps\$(Configuration)\libllhttp\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -132,8 +141,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OPENSSL_ROOT_DIR)\lib;..\..\..\bin\msvc\$(Configuration);..\..\..\bin\msvc\$(Configuration)\liboqs\lib;..\..\..\bin\msvc\$(Configuration)\oqs-provider\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;cpp-httplib-0.40.0.lib;oqs.lib;oqsprovider.lib;Ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENSSL_ROOT_DIR)\lib;..\..\..\_deps\$(Configuration)\liboqs\lib;..\..\..\_deps\oqs-provider\lib\$(Configuration);..\..\..\_deps\$(Configuration)\libllhttp\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libssl.lib;libcrypto.lib;oqs.lib;oqsprovider.lib;llhttp.lib;ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>del "$(TargetDir)$(TargetName).exp"
@@ -172,15 +181,15 @@ del "$(TargetDir)$(TargetName).lib"
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CPPHTTPLIB_OPENSSL_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\bin\msvc\$(Configuration)\liboqs\include;..\..\..\bin\msvc\$(Configuration)\oqs-provider\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENSSL_ROOT_DIR)\include;..\..\..\src\servers;..\..\..\src\common;..\..\..\include;..\..\..\_deps\liboqs\include;..\..\..\_deps\oqs-provider\include;..\..\..\_deps\libllhttp\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OPENSSL_ROOT_DIR)\lib;..\..\..\bin\msvc\$(Configuration);..\..\..\bin\msvc\$(Configuration)\liboqs\lib;..\..\..\bin\msvc\$(Configuration)\oqs-provider\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;cpp-httplib-0.40.0.lib;oqs.lib;oqsprovider.lib;Ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENSSL_ROOT_DIR)\lib;..\..\..\_deps\liboqs\lib;..\..\..\_deps\oqs-provider\lib\$(Configuration);..\..\..\_deps\libllhttp\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libssl.lib;libcrypto.lib;oqs.lib;oqsprovider.lib;llhttp.lib;ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>del "$(TargetDir)$(TargetName).exp"

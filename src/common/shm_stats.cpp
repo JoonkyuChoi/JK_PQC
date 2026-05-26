@@ -42,26 +42,26 @@ CShmStatsProducer::~CShmStatsProducer()
 bool CShmStatsProducer::Init()
 {
 #ifndef _WIN32
-  fprintf(stderr, "[ERR_] CShmStatsProducer::Init 미지원 플랫폼\n");
+  printf("[ERR_] CShmStatsProducer::Init 미지원 플랫폼\n");
   return false;
 #else
   m_pMutex = CreateMutexW(NULL, FALSE, SHM_MUTEX);
   if (m_pMutex == NULL)
   {
-    fprintf(stderr, "[ERR_] CreateMutexW 실패 (err=%lu)\n", GetLastError());
+    printf("[ERR_] CreateMutexW 실패 (err=%lu)\n", GetLastError());
     return false;
   }
   m_pMapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, static_cast<DWORD>(sizeof(T_JKPQC_STATS)), SHM_NAME);
   if (m_pMapFile == NULL)
   {
-    fprintf(stderr, "[ERR_] CreateFileMappingW 실패 (err=%lu)\n", GetLastError());
+    printf("[ERR_] CreateFileMappingW 실패 (err=%lu)\n", GetLastError());
     Shutdown();
     return false;
   }
   m_ptStats = static_cast<T_JKPQC_STATS*>(MapViewOfFile(static_cast<HANDLE>(m_pMapFile), FILE_MAP_ALL_ACCESS, 0, 0, sizeof(T_JKPQC_STATS)));
   if (m_ptStats == NULL)
   {
-    fprintf(stderr, "[ERR_] MapViewOfFile 실패 (err=%lu)\n", GetLastError());
+    printf("[ERR_] MapViewOfFile 실패 (err=%lu)\n", GetLastError());
     Shutdown();
     return false;
   }
@@ -165,13 +165,13 @@ void CShmStatsProducer::_writeStats(const T_JKPQC_STATS& a_rtStats)
   const DWORD l_dwWait = WaitForSingleObject(static_cast<HANDLE>(m_pMutex), 500);
   if ((l_dwWait != WAIT_OBJECT_0) && (l_dwWait != WAIT_ABANDONED))
   {
-    fprintf(stderr, "[ERR_] WaitForSingleObject 실패/타임아웃 (err=%lu)\n", GetLastError());
+    printf("[ERR_] WaitForSingleObject 실패/타임아웃 (err=%lu)\n", GetLastError());
     return;
   }
   memcpy(m_ptStats, &a_rtStats, sizeof(T_JKPQC_STATS));
   if (!ReleaseMutex(static_cast<HANDLE>(m_pMutex)))
   {
-    fprintf(stderr, "[ERR_] ReleaseMutex 실패 (err=%lu)\n", GetLastError());
+    printf("[ERR_] ReleaseMutex 실패 (err=%lu)\n", GetLastError());
   }
 #endif
 }

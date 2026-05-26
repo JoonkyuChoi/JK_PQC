@@ -13,5 +13,12 @@ Copyright   : 2026~ by Joonkyu Choi, All rights reserved.
 #include <openssl/provider.h>
 #include <openssl/ssl.h>
 
-bool gfLoadProvider4OQS(OSSL_LIB_CTX* a_pCtx); // 해당 OpenSSL 컨텍스트에 OQS-Provider를 로드하고, 성공 여부를 리턴한다. (a_pCtx가 NULL이면 기본 라이브러리 컨텍스트에 로드합니다.)
-void gfPrintInfo4SSL(SSL* a_pSsl); // Cipher Suite 후 KEM(우선 SSL_get0_group_name, 폴백 SSL_get_negotiated_group+OBJ), Peer Subject 출력
+// OQS-Provider(oqsprovider)를 OpenSSL 라이브러리 컨텍스트에 동적 로드
+// a_pCtx: 대상 OSSL_LIB_CTX (NULL이면 프로세스 기본 컨텍스트)
+// 반환값: provider 로드·활성화 성공 여부
+bool gfLoadProvider4OQS(OSSL_LIB_CTX* a_pCtx);
+
+// TLS 핸드셰이크 완료 후 협상 Cipher·KEM 그룹·피어 인증서 Subject를 stdout에 출력
+// a_pSsl: 정보를 조회할 SSL 세션 포인터 (NULL이면 no-op)
+void gfPrintInfo4SSL(SSL* a_pSsl);
+// -----------------------------------------------------------------------------

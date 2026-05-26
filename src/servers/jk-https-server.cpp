@@ -55,7 +55,7 @@ int main(int a_iArgc, char** a_ppszArgv)
     {
       if ((l_i + 1) >= a_iArgc)
       {
-        fprintf(stderr, "[ERR_] --kem 옵션에 값이 필요합니다.\n");
+        printf("[ERR_] --kem 옵션에 값이 필요합니다.\n");
         return 1;
       }
       l_strKemOpt = a_ppszArgv[++l_i];
@@ -87,9 +87,9 @@ int main(int a_iArgc, char** a_ppszArgv)
   {
     return 1;
   }
-  printf("Dual Cert    : %s\n", l_bDualCert ? "ML-DSA + ECDSA"  : "ML-DSA only");
-  printf("mTLS         : %s\n", l_bmTLS     ? "enabled"         : "disabled (TLS only)");
-  printf("KEM Groups   : %s\n", l_oServer.GetKemGroups().c_str());
+  printf("[INFO] Dual Cert    : %s\n", l_bDualCert ? "ML-DSA + ECDSA"  : "ML-DSA only");
+  printf("[INFO] mTLS         : %s\n", l_bmTLS     ? "enabled"         : "disabled (TLS only)");
+  printf("[INFO] KEM Groups   : %s\n", l_oServer.GetKemGroups().c_str());
   // -------------------------------------
   // 서버 실행
   // -------------------------------------
