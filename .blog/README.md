@@ -18,26 +18,20 @@ portfolio
 ```
 - 개발 이력
   [2026.05.23 ~ 2026.05.26] 고성능 PQC 서버(jk-pqc-server) 개발
-    ```markdown
     * `IOCP/EPOLL + LLHTTP`를 적용한 고성능 PQC 서버(jk-pqc-server) 개발
     * 종속 라이브러리들을 포함한 모든 프로젝트를 `/MD` 모드로 재빌드
-      `KONG, APISIX` 게이트웨이들에 PQC를 적용시키기 위해. `/MD` 모드로 빌드된 결과물 필요
+      `KONG, APISIX` 게이트웨이들에 PQC를 적용시키기 위해. `/MD` 모드 필요
     * `jk-pqc-server`의 구성 정보를 `config.json` 파일에서 로드하도록 처리
-    ```
-  [2026.05.23 ~ 2026.05.23] cpp-httplib, liboqs, oqs-provider 설치 경로 변경 (include, bin > src/common, _deps)
-    ```bash
-    git rm -r "./include"
-    git rm -r "./bin"
-    ```
+  [2026.05.23 ~ 2026.05.23] cpp-httplib, liboqs, oqs-provider 설치 경로 변경
+    * git rm -r "./include"
+    * git rm -r "./bin"
   [2026.05.18 ~ 2026.05.19] GitHub 등록
   [2026.04.21 ~ 2026.05.16] Windows PQC mTLS 인증 시스템 구축
-    ```markdown
     * jk-mtls-server
     * jk-mtls-client
     * jk-https-server
     * jk-https-client
     * jk-https-dashboard
-    ```
 - 개발 환경 및 툴
   Cursor, MSVC2022, Perl, nasm, CMake
 - 개발 언어
@@ -68,6 +62,7 @@ NIST는 이에 대응하여, 2024년 ML-KEM(FIPS 203), ML-DSA(FIPS 204), SLH-DSA
 - ML-KEM, ML-DSA 알고리즘을 활용한 Hybrid mTLS 통신
 - 고전 암호(X25519, ECDSA)와 PQC를 결합한 Hybrid 방식으로, 전환기 호환성 확보
 - cpp-httplib 기반 경량 HTTPS 서버/클라이언트 구현
+- llhttp 기반 IOCP/epoll을 적용한 고성능 HTTPS 서버 구현
 
 ### 개발 방식
 - 기획 : 저작자 (JK), Claude.ai
